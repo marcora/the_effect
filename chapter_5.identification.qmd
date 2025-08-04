@@ -17,17 +17,17 @@ Let’s generate some data. A good way to think about how DGPs can help with res
 
 In the world that we’re crafting, these will be the laws:
 
--   Income is log-normally distributed (see Chapter 3)
-
--   Being brown-haired gives you a 10% income boost
-
--   20% of people are naturally brown-haired
-
--   Having a college degree gives you a 20% income boost
+-   Income is log-normally distributed
 
 -   30% of people have college degrees
 
--   40% of people who don’t have brown hair or a college degree will choose to dye their hair brown
+-   20% of people are naturally brown-haired (i.e., 80% are NOT naturally brown-haired)
+
+-   40% of people who don’t have brown hair OR a college degree will choose to dye their hair brown
+
+-   Being brown-haired gives you a 10% income boost
+
+-   Having a college degree gives you a 20% income boost
 
 $Pr(College) = .3$
 
@@ -53,4 +53,31 @@ Let’s say that we have some data that has been generated from these laws, but 
 
 ```{r}
 gf_density(~ logincome, color = ~ factor(brownhair), data = d)
+```
+
+```{r}
+lm(logincome ~ factor(brownhair), data = d)
+```
+
+```{r}
+lm(logincome ~ factor(brownhair) + factor(college), data = d)
+```
+
+```{r}
+library(simDAG)
+
+dag <- empty_dag() +
+  node("college", type = "rbernoulli", p = 0.3) +
+  node("brownhair", type = "rbernoulli", p = 0.08 - 1.468 * college) +
+  node("logincome", type = "gaussian", formula = ~ 0 + 0.1 * brownhair + 0.2 * college, error = 0.1)
+
+plot(dag)
+
+sim_dat <- sim_from_dag(dag, n_sim = 1000)
+
+head(sim_dat)
+```
+
+```{r}
+gf_density(~ logincome, color = ~ factor(brownhair), data = sim_dat)
 ```

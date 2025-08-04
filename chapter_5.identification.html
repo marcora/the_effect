@@ -138,12 +138,12 @@ window.Quarto = {
 <p>Let’s generate some data. A good way to think about how DGPs can help with research is to cheat a little and make some data where we know the data generating process for sure.</p>
 <p>In the world that we’re crafting, these will be the laws:</p>
 <ul>
-<li><p>Income is log-normally distributed (see Chapter 3)</p></li>
-<li><p>Being brown-haired gives you a 10% income boost</p></li>
-<li><p>20% of people are naturally brown-haired</p></li>
-<li><p>Having a college degree gives you a 20% income boost</p></li>
+<li><p>Income is log-normally distributed</p></li>
 <li><p>30% of people have college degrees</p></li>
-<li><p>40% of people who don’t have brown hair or a college degree will choose to dye their hair brown</p></li>
+<li><p>20% of people are naturally brown-haired (i.e., 80% are NOT naturally brown-haired)</p></li>
+<li><p>40% of people who don’t have brown hair OR a college degree will choose to dye their hair brown</p></li>
+<li><p>Being brown-haired gives you a 10% income boost</p></li>
+<li><p>Having a college degree gives you a 20% income boost</p></li>
 </ul>
 <p><span class="math inline">\(Pr(College) = .3\)</span></p>
 <p><span class="math inline">\(Pr(BrownHair) = .2 + .8\times.4\times(College == 0)\)</span></p>
@@ -166,6 +166,89 @@ window.Quarto = {
 <div>
 <figure class="figure">
 <p><img src="chapter_5.identification_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(logincome <span class="sc">~</span> <span class="fu">factor</span>(brownhair), <span class="at">data =</span> d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = logincome ~ factor(brownhair), data = d)
+
+Coefficients:
+       (Intercept)  factor(brownhair)1  
+            0.0826              0.0531  </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(logincome <span class="sc">~</span> <span class="fu">factor</span>(brownhair) <span class="sc">+</span> <span class="fu">factor</span>(college), <span class="at">data =</span> d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = logincome ~ factor(brownhair) + factor(college), 
+    data = d)
+
+Coefficients:
+       (Intercept)  factor(brownhair)1    factor(college)1  
+          -0.00235             0.10647             0.20166  </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(simDAG)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'simDAG'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:mosaic':
+
+    do</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:dplyr':
+
+    do</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:purrr':
+
+    rbernoulli</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>dag <span class="ot">&lt;-</span> <span class="fu">empty_dag</span>() <span class="sc">+</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">node</span>(<span class="st">"college"</span>, <span class="at">type =</span> <span class="st">"rbernoulli"</span>, <span class="at">p =</span> <span class="fl">0.3</span>) <span class="sc">+</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">node</span>(<span class="st">"brownhair"</span>, <span class="at">type =</span> <span class="st">"rbernoulli"</span>, <span class="at">p =</span> <span class="fl">0.08</span> <span class="sc">-</span> <span class="fl">1.468</span> <span class="sc">*</span> college) <span class="sc">+</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">node</span>(<span class="st">"logincome"</span>, <span class="at">type =</span> <span class="st">"gaussian"</span>, <span class="at">formula =</span> <span class="sc">~</span> <span class="dv">0</span> <span class="sc">+</span> <span class="fl">0.1</span> <span class="sc">*</span> brownhair <span class="sc">+</span> <span class="fl">0.2</span> <span class="sc">*</span> college, <span class="at">error =</span> <span class="fl">0.1</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dag)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="chapter_5.identification_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>sim_dat <span class="ot">&lt;-</span> <span class="fu">sim_from_dag</span>(dag, <span class="at">n_sim =</span> <span class="dv">1000</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sim_dat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   college brownhair logincome
+    &lt;lgcl&gt;    &lt;lgcl&gt;     &lt;num&gt;
+1:    TRUE     FALSE    0.0394
+2:   FALSE     FALSE    0.1015
+3:    TRUE     FALSE    0.2918
+4:   FALSE     FALSE   -0.1073
+5:    TRUE     FALSE    0.1322
+6:    TRUE     FALSE    0.3181</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gf_density</span>(<span class="sc">~</span> logincome, <span class="at">color =</span> <span class="sc">~</span> <span class="fu">factor</span>(brownhair), <span class="at">data =</span> sim_dat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="chapter_5.identification_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
