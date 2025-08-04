@@ -5,6 +5,7 @@ format:
     df-print: paged
     toc: true
 ---
+
 ## Setup environment
 
 ```{r}
@@ -68,7 +69,7 @@ gf_density(~ logincome, fill = ~ factor(brownhair), data = sim_dat)
 exp(mean(logincome ~ factor(brownhair), data = sim_dat))
 ```
 
-## Simulation using DAG
+### Simulation using DAG
 
 ```{r}
 dag <- empty_dag() +
@@ -89,11 +90,39 @@ lm(logincome ~ factor(brownhair), data = dag_dat)
 lm(logincome ~ factor(brownhair) + factor(college), data = dag_dat)
 ```
 
-
 ```{r}
 gf_density(~ logincome, fill = ~ factor(brownhair), data = dag_dat)
 ```
 
 ```{r}
 exp(mean(logincome ~ factor(brownhair), data = dag_dat))
+```
+
+## Identifiability
+
+Identification without confounding
+
+![](images/clipboard-3165771262.png)
+
+Identification with confounding:
+
+![](images/clipboard-3779750103.png)
+
+## The do operator
+
+![](images/clipboard-3734840045.png)
+
+$P(Y = y \mid \text{do}(T = t))$ or $P(y \mid \text{do}(t))$ is the probability of $Y = y$ if we intervene to set $T = t$
+
+```{r}
+ss <- expand_grid(
+  T = 0:1,
+  Y = 0:100)
+
+ss <- ss |> 
+  mutate(
+    p_unnorm = dnorm(Y, mean = 50 + 10 * T, sd = 10),
+    p = p_unnorm / sum(p_unnorm))
+
+ss
 ```
