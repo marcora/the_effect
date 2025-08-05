@@ -12,10 +12,10 @@ format:
 #| output: false
 library(tidyverse)
 library(ggformula)
-library(mosaic)
 library(simDAG)
+library(emmeans)
 
-theme_set(theme_minimal())
+theme_set(theme_bw())
 set.seed(666)
 ```
 
@@ -284,5 +284,119 @@ nim_data <- data.frame(
 )
 
 head(nim_data)
+```
 
+## Visualizing the effect of a categorical variable adjusted for another variable
+
+```{r}
+# Simulate data
+set.seed(123)
+n <- 200
+sex <- factor(sample(c("male", "female"), n, replace = TRUE))
+height <- rnorm(n, mean = ifelse(sex == "male", 175, 165), sd = 7)
+weight <- 0.5 * height + ifelse(sex == "male", 5, -5) + rnorm(n, 0, 5)
+
+# Create data frame
+df <- tibble(weight, height, sex)
+
+# Fit linear model
+model <- lm(weight ~ height + sex, data = df)
+
+# Extract adjusted data from visreg (type = "conditional" is default)
+v <- visreg(model, "sex", type = "conditional", plot = FALSE)
+
+# Partial residuals (adjusted data)
+df_res <- v$res  # contains: sex, visregRes (partial residual)
+
+# Model-adjusted means and CIs
+df_fit <- v$fit  # contains: sex, visregFit (mean), visregLwr, visregUpr
+
+# Plot
+ggplot() +
+  geom_jitter(data = df_res, aes(x = sex, y = visregRes), 
+              width = 0.1, alpha = 0.4) +
+  geom_point(data = df_fit, aes(x = sex, y = visregFit), 
+             size = 4, color = "red") +
+  geom_errorbar(data = df_fit, 
+                aes(x = sex, ymin = visregLwr, ymax = visregUpr), 
+                width = 0.15, color = "red") +
+  labs(title = "Effect of Sex on Weight (adjusted for Height)",
+       x = "Sex",
+       y = "Adjusted Weight (partial residuals + model fit)")
+```
+
+```{r}
+library(dagitty)
+
+# Define the DAG
+dag <- dagitty("
+dag {
+  sex -> height
+  height -> weight
+  sex -> weight
+}
+")
+
+# Print DAG
+plot(dag)
+
+# Query adjustment sets for effect of sex on weight
+adjustmentSets(dag, exposure = "sex", outcome = "weight")  # total effect of sex on weight → {}
+adjustmentSets(dag, exposure = "sex", outcome = "weight", effect = "direct")  # direct effect of sex on weight→ {height}
+```
+
+https://setosa.io/simpsons/
+
+
+```{r}
+# original long-form data
+df <- tibble(
+  a = rnorm(10, mean = 5, sd = 3),
+  b = rnorm(10, mean = 10, sd = 3)
+) |> 
+  pivot_longer(cols = everything(), names_to = "grp", values_to = "val")
+
+# Number of bootstrap replicates
+n_boot <- 1000
+
+# Bootstrap difference in means
+boot_dist <- tibble(
+  boot_id = 1:n_boot
+) |> 
+  mutate(
+    diff = map_dbl(boot_id, ~{
+      df |> 
+        group_by(grp) |> 
+        slice_sample(n = n(), replace = TRUE) |> 
+        summarise(mean_val = mean(val), .groups = "drop") |> 
+        pivot_wider(names_from = grp, values_from = mean_val) |> 
+        summarise(diff = b - a) |> 
+        pull(diff)
+    })
+  )
+
+# View summary
+boot_dist |> 
+  summarise(
+    mean_diff = mean(diff),
+    lower_ci = quantile(diff, 0.025),
+    upper_ci = quantile(diff, 0.975)
+  )
+```
+
+```{r}
+library(emmeans)
+
+fit <- lm(val ~ grp, data = df)
+
+emmeans(fit, revpairwise ~ grp) |> confint()
+```
+
+```{r}
+library(rstanarm)
+options(mc.cores = parallel::detectCores())
+
+fit <- stan_glm(val ~ grp, data = df)
+
+emmeans(fit, revpairwise ~ grp) |> confint()
 ```
