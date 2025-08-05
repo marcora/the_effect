@@ -402,7 +402,9 @@ emmeans(fit, revpairwise ~ grp) |> confint()
 ```
 
 ```{r}
+# Load necessary libraries
 library(lme4)
+library(visreg)
 
 # Load the data
 data("sleepstudy", package = "lme4")
@@ -411,9 +413,9 @@ data("sleepstudy", package = "lme4")
 head(sleepstudy)
 # Columns: Reaction (response time), Days (days of sleep deprivation), Subject (random effect)
 
-# ✅ Fit a mixed model: random intercept + slope for each Subject
+# Fit a mixed model: random intercept + slope for each Subject
 model <- lmer(Reaction ~ Days + (Days | Subject), data = sleepstudy)
 
-# ✅ Use visreg to plot the fixed effect of Days (adjusted for random effects)
+# Use visreg to plot the fixed effect of Days (adjusted for random effects)
 visreg(model, "Days", type = "conditional")
 ```
