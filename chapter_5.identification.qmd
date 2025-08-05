@@ -400,3 +400,20 @@ fit <- stan_glm(val ~ grp, data = df)
 
 emmeans(fit, revpairwise ~ grp) |> confint()
 ```
+
+```{r}
+library(lme4)
+
+# Load the data
+data("sleepstudy", package = "lme4")
+
+# Inspect data
+head(sleepstudy)
+# Columns: Reaction (response time), Days (days of sleep deprivation), Subject (random effect)
+
+# ✅ Fit a mixed model: random intercept + slope for each Subject
+model <- lmer(Reaction ~ Days + (Days | Subject), data = sleepstudy)
+
+# ✅ Use visreg to plot the fixed effect of Days (adjusted for random effects)
+visreg(model, "Days", type = "conditional")
+```
