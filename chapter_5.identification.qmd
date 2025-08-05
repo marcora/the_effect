@@ -126,3 +126,163 @@ ss <- ss |>
 
 ss
 ```
+
+```{r}
+library(R6causal)
+
+SCM_model <- SCM$new(
+  uflist = list(
+    Uz = function(n) { runif(n) },
+    Ux = function(n) { runif(n) },
+    Uy = function(n) { runif(n) }
+ ),
+  vflist = list(
+    Z = function(Uz) { Uz },                  # Exogenous variable Z (noise Uz)
+    X = function(Z, Ux) { Z + Ux },           # X depends on Z + its own noise
+    Y = function(X, Uy) { 2 * X + Uy }        # Y depends on X + its own noise
+  )
+)
+
+SCM_model$plot()
+
+data <- SCM_model$simulate(100)
+
+SCM_model$simdata
+
+SCM_model$intervene("X", 3)
+
+data_do <- SCM_model$simulate(100)
+```
+
+```{r}
+set.seed(123)
+n <- 1000
+Z <- rnorm(n)                      # a confounder
+X <- rbinom(n, 1, plogis(0.5*Z))   # treatment assignment depends on Z
+Y <- 2*X + 1*Z + rnorm(n)          # outcome generated with a causal effect of X (2 units)
+dat <- data.frame(Y, X, Z)
+
+fit <- glm(Y ~ X + Z, data = dat)
+summary(fit)
+```
+
+```{r}
+library(visreg)
+
+visreg(fit, "X", ylab = "Y (adjusted)", xlab = "Treatment (X)")
+
+visreg(fit, "Z", ylab = "Y (adjusted)", xlab = "Confounder (Z)")
+
+fit2 <- glm(Y ~ X * Z, data = dat)
+
+visreg(fit2, "X", by = "Z")
+```
+
+```{r}
+library(simcausal)
+D <- DAG.empty() +
+  node("W", distr = "rnorm", mean = 0, sd = 1) +
+  node("A", distr = "rbinom", size = 1, prob = plogis(W)) +
+  node("Y", distr = "rnorm", mean = A + W)
+D <- set.DAG(D)
+dat <- sim(D, n=200)
+plotDAG(D)
+```
+
+```{r}
+library(dosearch)
+# back-door formula
+data <- "p(x,y,z)"
+query <- "p(y|do(x))"
+graph <- "
+  x -> y
+  z -> x
+  z -> y
+"
+dosearch(data, query, graph)
+#> \sum_{z}\left(p(z)p(y|x,z)\right)
+
+# front-door formula
+graph <- "
+  x -> z
+  z -> y
+  x <-> y
+"
+dosearch(data, query, graph)
+#> \sum_{z}\left(p(z|x)\sum_{x}\left(p(x)p(y|z,x)\right)\right)
+
+# the 'napkin' graph
+data <- "p(x,y,z,w)"
+graph <- "
+  x -> y
+  z -> x
+  w -> z
+  x <-> w
+  w <-> y
+"
+dosearch(data, query, graph)
+#> \frac{\sum_{w}\left(p(w)p(y,x|z,w)\right)}{\sum_{y}\sum_{w}\left(p(w)p(y,x|z,w)\right)}
+
+# case-control design
+data <- "
+  p(x*,y*,r_x,r_y)
+  p(y)
+"
+graph <- "
+  x -> y
+  y -> r_y
+  r_y -> r_x
+"
+md <- "r_x : x, r_y : y"
+dosearch(data, query, graph, missing_data = md)
+#> \frac{\left(p(y)p(x|r_x = 1,y,r_y = 1)\right)}{\sum_{y}\left(p(y)p(x|r_x = 1,y,r_y = 1)\right)}
+```
+
+```{r}
+library(R6causal)
+set.seed(1)
+
+# Specify unobserved (latent/noise) and observed variables as named lists
+uflist <- list(
+  ut = function(n) rnorm(n, mean = 0, sd = 1)   # noise for temperature
+)
+vflist <- list(
+  T = function(ut) 30 + 10*ut,                                      # Temperature (confounder)
+  I = function(T) 200 + 5*T + rnorm(length(T), sd = 20),            # Ice cream sales
+  S = function(T) rpois(length(T), lambda = 0.3 + 0.05*T)           # Shark attacks
+)
+
+icecream_scm <- SCM$new(uflist = uflist, vflist = vflist)
+icecream_scm$simulate(500)
+sim_r6c <- icecream_scm$simdata
+head(sim_r6c)
+```
+
+```{r}
+library(nimble)
+set.seed(42)
+
+n <- 500
+model_code <- nimbleCode({
+  for (i in 1:N) {
+    T[i] ~ dnorm(30, sd = 10)                                      # Temperature
+    I[i] ~ dnorm(200 + 5 * T[i], sd = 20)                          # Ice cream sales
+    S[i] ~ dpois(0.3 + 0.05 * T[i])                                # Shark attacks
+  }
+})
+
+constants <- list(N = n)
+inits <- list(T = rep(30, n), I = rep(400, n), S = rep(2, n))
+
+mod <- nimbleModel(model_code, constants = constants, inits = inits)
+cmod <- compileNimble(mod)
+cmod$simulate(includeData = TRUE)
+nim_data <- data.frame(
+  T = cmod$T,
+  I = cmod$I,
+  S = cmod$S
+)
+
+head(nim_data)
+
+```

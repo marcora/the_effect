@@ -330,6 +330,336 @@ Coefficients:
 </div>
 </div>
 </div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(R6causal)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>SCM_model <span class="ot">&lt;-</span> SCM<span class="sc">$</span><span class="fu">new</span>(</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">uflist =</span> <span class="fu">list</span>(</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Uz =</span> <span class="cf">function</span>(n) { <span class="fu">runif</span>(n) },</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">Ux =</span> <span class="cf">function</span>(n) { <span class="fu">runif</span>(n) },</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">Uy =</span> <span class="cf">function</span>(n) { <span class="fu">runif</span>(n) }</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a> ),</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">vflist =</span> <span class="fu">list</span>(</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">Z =</span> <span class="cf">function</span>(Uz) { Uz },                  <span class="co"># Exogenous variable Z (noise Uz)</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">X =</span> <span class="cf">function</span>(Z, Ux) { Z <span class="sc">+</span> Ux },           <span class="co"># X depends on Z + its own noise</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">Y =</span> <span class="cf">function</span>(X, Uy) { <span class="dv">2</span> <span class="sc">*</span> X <span class="sc">+</span> Uy }        <span class="co"># Y depends on X + its own noise</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>SCM_model<span class="sc">$</span><span class="fu">plot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="chapter_5.identification_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> SCM_model<span class="sc">$</span><span class="fu">simulate</span>(<span class="dv">100</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>SCM_model<span class="sc">$</span>simdata</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["Uz"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Ux"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["Uy"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Z"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["X"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["Y"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"0.869505","2":"0.25618","3":"0.36716","4":"0.869505","5":"1.12569","6":"2.6185"},{"1":"0.189091","2":"0.01907","3":"0.94473","4":"0.189091","5":"0.20816","6":"1.3610"},{"1":"0.294691","2":"0.92692","3":"0.65896","4":"0.294691","5":"1.22161","6":"3.1022"},{"1":"0.765997","2":"0.58926","3":"0.67248","4":"0.765997","5":"1.35525","6":"3.3830"},{"1":"0.509680","2":"0.66153","3":"0.76653","4":"0.509680","5":"1.17121","6":"3.1090"},{"1":"0.888160","2":"0.67977","3":"0.39086","4":"0.888160","5":"1.56793","6":"3.5267"},{"1":"0.540490","2":"0.64612","3":"0.55045","4":"0.540490","5":"1.18661","6":"2.9237"},{"1":"0.935315","2":"0.22177","3":"0.86042","4":"0.935315","5":"1.15709","6":"3.1746"},{"1":"0.179823","2":"0.45711","3":"0.75459","4":"0.179823","5":"0.63693","6":"2.0285"},{"1":"0.927114","2":"0.88561","3":"0.48111","4":"0.927114","5":"1.81272","6":"4.1066"},{"1":"0.695118","2":"0.83397","3":"0.37708","4":"0.695118","5":"1.52909","6":"3.4353"},{"1":"0.439824","2":"0.92392","3":"0.28118","4":"0.439824","5":"1.36375","6":"3.0087"},{"1":"0.601952","2":"0.44921","3":"0.64246","4":"0.601952","5":"1.05117","6":"2.7448"},{"1":"0.294242","2":"0.31247","3":"0.63249","4":"0.294242","5":"0.60671","6":"1.8459"},{"1":"0.738397","2":"0.88846","3":"0.39057","4":"0.738397","5":"1.62686","6":"3.6443"},{"1":"0.623503","2":"0.35587","3":"0.54086","4":"0.623503","5":"0.97937","6":"2.4996"},{"1":"0.989269","2":"0.12288","3":"0.25563","4":"0.989269","5":"1.11215","6":"2.4799"},{"1":"0.634808","2":"0.33015","3":"0.72155","4":"0.634808","5":"0.96496","6":"2.6515"},{"1":"0.656001","2":"0.63941","3":"0.02270","4":"0.656001","5":"1.29542","6":"2.6135"},{"1":"0.046367","2":"0.02837","3":"0.57973","4":"0.046367","5":"0.07474","6":"0.7292"},{"1":"0.833159","2":"0.50300","3":"0.17691","4":"0.833159","5":"1.33616","6":"2.8492"},{"1":"0.075796","2":"0.13053","3":"0.78452","4":"0.075796","5":"0.20633","6":"1.1972"},{"1":"0.795931","2":"0.56967","3":"0.66363","4":"0.795931","5":"1.36560","6":"3.3948"},{"1":"0.141223","2":"0.37398","3":"0.75630","4":"0.141223","5":"0.51521","6":"1.7867"},{"1":"0.930076","2":"0.55935","3":"0.88543","4":"0.930076","5":"1.48942","6":"3.8643"},{"1":"0.579239","2":"0.98548","3":"0.97967","4":"0.579239","5":"1.56472","6":"4.1091"},{"1":"0.972497","2":"0.34909","3":"0.46120","4":"0.972497","5":"1.32158","6":"3.1044"},{"1":"0.152415","2":"0.91834","3":"0.12797","4":"0.152415","5":"1.07076","6":"2.2695"},{"1":"0.555734","2":"0.64510","3":"0.96433","4":"0.555734","5":"1.20083","6":"3.3660"},{"1":"0.481765","2":"0.65504","3":"0.46117","4":"0.481765","5":"1.13680","6":"2.7348"},{"1":"0.296491","2":"0.71674","3":"0.94623","4":"0.296491","5":"1.01324","6":"2.9727"},{"1":"0.607672","2":"0.48359","3":"0.25282","4":"0.607672","5":"1.09127","6":"2.4353"},{"1":"0.643877","2":"0.41733","3":"0.96961","4":"0.643877","5":"1.06120","6":"3.0920"},{"1":"0.237675","2":"0.11338","3":"0.64795","4":"0.237675","5":"0.35105","6":"1.3501"},{"1":"0.689180","2":"0.62043","3":"0.91087","4":"0.689180","5":"1.30961","6":"3.5301"},{"1":"0.498660","2":"0.76297","3":"0.47075","4":"0.498660","5":"1.26163","6":"2.9940"},{"1":"0.190818","2":"0.33063","3":"0.80846","4":"0.190818","5":"0.52145","6":"1.8514"},{"1":"0.540844","2":"0.81240","3":"0.45761","4":"0.540844","5":"1.35325","6":"3.1641"},{"1":"0.010636","2":"0.26889","3":"0.48140","4":"0.010636","5":"0.27952","6":"1.0404"},{"1":"0.620867","2":"0.75520","3":"0.51684","4":"0.620867","5":"1.37606","6":"3.2690"},{"1":"0.715158","2":"0.11369","3":"0.73874","4":"0.715158","5":"0.82885","6":"2.3964"},{"1":"0.008108","2":"0.52928","3":"0.02149","4":"0.008108","5":"0.53739","6":"1.0963"},{"1":"0.875192","2":"0.09993","3":"0.68235","4":"0.875192","5":"0.97512","6":"2.6326"},{"1":"0.383529","2":"0.92373","3":"0.42225","4":"0.383529","5":"1.30726","6":"3.0368"},{"1":"0.473352","2":"0.63994","3":"0.66812","4":"0.473352","5":"1.11329","6":"2.8947"},{"1":"0.818820","2":"0.04983","3":"0.62948","4":"0.818820","5":"0.86865","6":"2.3668"},{"1":"0.143700","2":"0.64779","3":"0.90249","4":"0.143700","5":"0.79149","6":"2.4855"},{"1":"0.828951","2":"0.75743","3":"0.74668","4":"0.828951","5":"1.58638","6":"3.9194"},{"1":"0.089915","2":"0.72784","3":"0.02805","4":"0.089915","5":"0.81775","6":"1.6636"},{"1":"0.322772","2":"0.46781","3":"0.08653","4":"0.322772","5":"0.79058","6":"1.6677"},{"1":"0.008535","2":"0.19737","3":"0.86002","4":"0.008535","5":"0.20591","6":"1.2718"},{"1":"0.146844","2":"0.20625","3":"0.30586","4":"0.146844","5":"0.35310","6":"1.0121"},{"1":"0.643658","2":"0.60789","3":"0.84282","4":"0.643658","5":"1.25155","6":"3.3459"},{"1":"0.323285","2":"0.53512","3":"0.42178","4":"0.323285","5":"0.85841","6":"2.1386"},{"1":"0.010776","2":"0.13649","3":"0.58624","4":"0.010776","5":"0.14726","6":"0.8808"},{"1":"0.160621","2":"0.89588","3":"0.13501","4":"0.160621","5":"1.05650","6":"2.2480"},{"1":"0.478122","2":"0.94592","3":"0.35623","4":"0.478122","5":"1.42404","6":"3.2043"},{"1":"0.038027","2":"0.26775","3":"0.99695","4":"0.038027","5":"0.30577","6":"1.6085"},{"1":"0.864393","2":"0.86182","3":"0.85712","4":"0.864393","5":"1.72621","6":"4.3095"},{"1":"0.399127","2":"0.56939","3":"0.34322","4":"0.399127","5":"0.96852","6":"2.2803"},{"1":"0.729446","2":"0.54586","3":"0.29681","4":"0.729446","5":"1.27531","6":"2.8474"},{"1":"0.427320","2":"0.16280","3":"0.14353","4":"0.427320","5":"0.59012","6":"1.3238"},{"1":"0.438974","2":"0.50568","3":"0.59508","4":"0.438974","5":"0.94465","6":"2.4844"},{"1":"0.141962","2":"0.32332","3":"0.21865","4":"0.141962","5":"0.46528","6":"1.1492"},{"1":"0.308592","2":"0.97531","3":"0.63067","4":"0.308592","5":"1.28390","6":"3.1985"},{"1":"0.457554","2":"0.46283","3":"0.33307","4":"0.457554","5":"0.92039","6":"2.1738"},{"1":"0.252582","2":"0.65602","3":"0.19653","4":"0.252582","5":"0.90860","6":"2.0137"},{"1":"0.749466","2":"0.89953","3":"0.24217","4":"0.749466","5":"1.64900","6":"3.5402"},{"1":"0.689649","2":"0.59338","3":"0.27498","4":"0.689649","5":"1.28303","6":"2.8410"},{"1":"0.406970","2":"0.63699","3":"0.61549","4":"0.406970","5":"1.04396","6":"2.7034"},{"1":"0.735750","2":"0.20354","3":"0.10032","4":"0.735750","5":"0.93929","6":"1.9789"},{"1":"0.382412","2":"0.41017","3":"0.82402","4":"0.382412","5":"0.79258","6":"2.4092"},{"1":"0.991967","2":"0.03960","3":"0.95930","4":"0.991967","5":"1.03157","6":"3.0224"},{"1":"0.997002","2":"0.80407","3":"0.30499","4":"0.997002","5":"1.80107","6":"3.9071"},{"1":"0.646979","2":"0.35569","3":"0.19979","4":"0.646979","5":"1.00267","6":"2.2051"},{"1":"0.645630","2":"0.03575","3":"0.47125","4":"0.645630","5":"0.68138","6":"1.8340"},{"1":"0.980457","2":"0.33258","3":"0.89188","4":"0.980457","5":"1.31304","6":"3.5180"},{"1":"0.386131","2":"0.86539","3":"0.56520","4":"0.386131","5":"1.25152","6":"3.0682"},{"1":"0.509288","2":"0.22590","3":"0.37126","4":"0.509288","5":"0.73518","6":"1.8416"},{"1":"0.515486","2":"0.17530","3":"0.13572","4":"0.515486","5":"0.69078","6":"1.5173"},{"1":"0.484711","2":"0.56021","3":"0.03986","4":"0.484711","5":"1.04492","6":"2.1297"},{"1":"0.626853","2":"0.48889","3":"0.81313","4":"0.626853","5":"1.11574","6":"3.0446"},{"1":"0.886332","2":"0.29667","3":"0.89840","4":"0.886332","5":"1.18301","6":"3.2644"},{"1":"0.204289","2":"0.52430","3":"0.68551","4":"0.204289","5":"0.72859","6":"2.1427"},{"1":"0.668210","2":"0.11744","3":"0.69726","4":"0.668210","5":"0.78565","6":"2.2685"},{"1":"0.012449","2":"0.83492","3":"0.73051","4":"0.012449","5":"0.84737","6":"2.4253"},{"1":"0.415874","2":"0.93890","3":"0.98276","4":"0.415874","5":"1.35478","6":"3.6923"},{"1":"0.450097","2":"0.54220","3":"0.91766","4":"0.450097","5":"0.99230","6":"2.9023"},{"1":"0.543003","2":"0.78256","3":"0.38507","4":"0.543003","5":"1.32556","6":"3.0362"},{"1":"0.361282","2":"0.93904","3":"0.41629","4":"0.361282","5":"1.30032","6":"3.0169"},{"1":"0.626200","2":"0.04007","3":"0.18257","4":"0.626200","5":"0.66627","6":"1.5151"},{"1":"0.881277","2":"0.89110","3":"0.34659","4":"0.881277","5":"1.77237","6":"3.8913"},{"1":"0.466631","2":"0.62648","3":"0.35006","4":"0.466631","5":"1.09311","6":"2.5363"},{"1":"0.522541","2":"0.76972","3":"0.98098","4":"0.522541","5":"1.29226","6":"3.5655"},{"1":"0.171686","2":"0.89884","3":"0.27781","4":"0.171686","5":"1.07053","6":"2.4189"},{"1":"0.647835","2":"0.89693","3":"0.12200","4":"0.647835","5":"1.54476","6":"3.2115"},{"1":"0.217383","2":"0.57977","3":"0.49937","4":"0.217383","5":"0.79715","6":"2.0937"},{"1":"0.948448","2":"0.66337","3":"0.89871","4":"0.948448","5":"1.61182","6":"4.1224"},{"1":"0.972552","2":"0.26407","3":"0.22218","4":"0.972552","5":"1.23662","6":"2.6954"},{"1":"0.811288","2":"0.38277","3":"0.66657","4":"0.811288","5":"1.19406","6":"3.0547"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>SCM_model<span class="sc">$</span><span class="fu">intervene</span>(<span class="st">"X"</span>, <span class="dv">3</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>data_do <span class="ot">&lt;-</span> SCM_model<span class="sc">$</span><span class="fu">simulate</span>(<span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)                      <span class="co"># a confounder</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fu">plogis</span>(<span class="fl">0.5</span><span class="sc">*</span>Z))   <span class="co"># treatment assignment depends on Z</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">*</span>X <span class="sc">+</span> <span class="dv">1</span><span class="sc">*</span>Z <span class="sc">+</span> <span class="fu">rnorm</span>(n)          <span class="co"># outcome generated with a causal effect of X (2 units)</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(Y, X, Z)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> X <span class="sc">+</span> Z, <span class="at">data =</span> dat)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = Y ~ X + Z, data = dat)
+
+Coefficients:
+            Estimate Std. Error t value            Pr(&gt;|t|)    
+(Intercept)   0.0160     0.0431    0.37                0.71    
+X             1.9623     0.0635   30.90 &lt;0.0000000000000002 ***
+Z             0.9463     0.0320   29.59 &lt;0.0000000000000002 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for gaussian family taken to be 0.9682)
+
+    Null deviance: 3156.16  on 999  degrees of freedom
+Residual deviance:  965.32  on 997  degrees of freedom
+AIC: 2811
+
+Number of Fisher Scoring iterations: 2</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(visreg)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">visreg</span>(fit, <span class="st">"X"</span>, <span class="at">ylab =</span> <span class="st">"Y (adjusted)"</span>, <span class="at">xlab =</span> <span class="st">"Treatment (X)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="chapter_5.identification_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">visreg</span>(fit, <span class="st">"Z"</span>, <span class="at">ylab =</span> <span class="st">"Y (adjusted)"</span>, <span class="at">xlab =</span> <span class="st">"Confounder (Z)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="chapter_5.identification_files/figure-html/unnamed-chunk-13-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>fit2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> X <span class="sc">*</span> Z, <span class="at">data =</span> dat)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="fu">visreg</span>(fit2, <span class="st">"X"</span>, <span class="at">by =</span> <span class="st">"Z"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="chapter_5.identification_files/figure-html/unnamed-chunk-13-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(simcausal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Registered S3 methods overwritten by 'simcausal':
+  method         from  
+  +.DAG          simDAG
+  print.DAG      simDAG
+  print.DAG.node simDAG</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'simcausal'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:simDAG':
+
+    node</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">DAG.empty</span>() <span class="sc">+</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">node</span>(<span class="st">"W"</span>, <span class="at">distr =</span> <span class="st">"rnorm"</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">node</span>(<span class="st">"A"</span>, <span class="at">distr =</span> <span class="st">"rbinom"</span>, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fu">plogis</span>(W)) <span class="sc">+</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">node</span>(<span class="st">"Y"</span>, <span class="at">distr =</span> <span class="st">"rnorm"</span>, <span class="at">mean =</span> A <span class="sc">+</span> W)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">set.DAG</span>(D)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>...automatically assigning order attribute to some nodes...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>node W, order:1</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>node A, order:2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>node Y, order:3</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">sim</span>(D, <span class="at">n=</span><span class="dv">200</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>simulating observed dataset from the DAG object</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotDAG</span>(D)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>using the following vertex attributes: </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>NAdarkbluenone100.50</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>using the following edge attributes: </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>black0.210.60.5</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="chapter_5.identification_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dosearch)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="co"># back-door formula</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="st">"p(x,y,z)"</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>query <span class="ot">&lt;-</span> <span class="st">"p(y|do(x))"</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>graph <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="st">  x -&gt; y</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a><span class="st">  z -&gt; x</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a><span class="st">  z -&gt; y</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a><span class="fu">dosearch</span>(data, query, graph)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>\sum_{z}\left(p(z)p(y|x,z)\right)  </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; \sum_{z}\left(p(z)p(y|x,z)\right)</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="co"># front-door formula</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>graph <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="st">  x -&gt; z</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="st">  z -&gt; y</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="st">  x &lt;-&gt; y</span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a><span class="fu">dosearch</span>(data, query, graph)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>\sum_{z}\left(p(z|x)\sum_{x}\left(p(x)p(y|z,x)\right)\right)  </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; \sum_{z}\left(p(z|x)\sum_{x}\left(p(x)p(y|z,x)\right)\right)</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="co"># the 'napkin' graph</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="st">"p(x,y,z,w)"</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>graph <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a><span class="st">  x -&gt; y</span></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a><span class="st">  z -&gt; x</span></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a><span class="st">  w -&gt; z</span></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="st">  x &lt;-&gt; w</span></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a><span class="st">  w &lt;-&gt; y</span></span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a><span class="fu">dosearch</span>(data, query, graph)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>\frac{\sum_{w}\left(p(w)p(y,x|z,w)\right)}{\sum_{y}\sum_{w}\left(p(w)p(y,x|z,w)\right)}  </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; \frac{\sum_{w}\left(p(w)p(y,x|z,w)\right)}{\sum_{y}\sum_{w}\left(p(w)p(y,x|z,w)\right)}</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="co"># case-control design</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="st">  p(x*,y*,r_x,r_y)</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a><span class="st">  p(y)</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>graph <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a><span class="st">  x -&gt; y</span></span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a><span class="st">  y -&gt; r_y</span></span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a><span class="st">  r_y -&gt; r_x</span></span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a>md <span class="ot">&lt;-</span> <span class="st">"r_x : x, r_y : y"</span></span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a><span class="fu">dosearch</span>(data, query, graph, <span class="at">missing_data =</span> md)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>\frac{\left(p(y)p(x|r_x = 1,y,r_y = 1)\right)}{\sum_{y}\left(p(y)p(x|r_x = 1,y,r_y = 1)\right)}  </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; \frac{\left(p(y)p(x|r_x = 1,y,r_y = 1)\right)}{\sum_{y}\left(p(y)p(x|r_x = 1,y,r_y = 1)\right)}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(R6causal)</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify unobserved (latent/noise) and observed variables as named lists</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>uflist <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ut =</span> <span class="cf">function</span>(n) <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)   <span class="co"># noise for temperature</span></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>vflist <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">T =</span> <span class="cf">function</span>(ut) <span class="dv">30</span> <span class="sc">+</span> <span class="dv">10</span><span class="sc">*</span>ut,                                      <span class="co"># Temperature (confounder)</span></span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">I =</span> <span class="cf">function</span>(T) <span class="dv">200</span> <span class="sc">+</span> <span class="dv">5</span><span class="sc">*</span>T <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="fu">length</span>(T), <span class="at">sd =</span> <span class="dv">20</span>),            <span class="co"># Ice cream sales</span></span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">S =</span> <span class="cf">function</span>(T) <span class="fu">rpois</span>(<span class="fu">length</span>(T), <span class="at">lambda =</span> <span class="fl">0.3</span> <span class="sc">+</span> <span class="fl">0.05</span><span class="sc">*</span>T)           <span class="co"># Shark attacks</span></span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a>icecream_scm <span class="ot">&lt;-</span> SCM<span class="sc">$</span><span class="fu">new</span>(<span class="at">uflist =</span> uflist, <span class="at">vflist =</span> vflist)</span>
+<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a>icecream_scm<span class="sc">$</span><span class="fu">simulate</span>(<span class="dv">500</span>)</span>
+<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a>sim_r6c <span class="ot">&lt;-</span> icecream_scm<span class="sc">$</span>simdata</span>
+<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sim_r6c)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ut"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["T"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["I"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["S"],"name":[4],"type":["int"],"align":["right"]}],"data":[{"1":"-0.6265","2":"23.74","3":"320.2","4":"3"},{"1":"0.1836","2":"31.84","3":"353.2","4":"5"},{"1":"-0.8356","2":"21.64","3":"284.6","4":"3"},{"1":"1.5953","2":"45.95","3":"430.0","4":"2"},{"1":"0.3295","2":"33.30","3":"386.3","4":"1"},{"1":"-0.8205","2":"21.80","3":"340.9","4":"0"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nimble)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>nimble version 1.3.0 is loaded.
+For more information on NIMBLE and a User Manual,
+please visit https://R-nimble.org.
+
+Note for advanced users who have written their own MCMC samplers:
+  As of version 0.13.0, NIMBLE's protocol for handling posterior
+  predictive nodes has changed in a way that could affect user-defined
+  samplers in some situations. Please see Section 15.5.1 of the User Manual.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'nimble'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:mosaic':
+
+    ilogit, logit</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:stats':
+
+    simulate</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:base':
+
+    declare</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>model_code <span class="ot">&lt;-</span> <span class="fu">nimbleCode</span>({</span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>N) {</span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>    T[i] <span class="sc">~</span> <span class="fu">dnorm</span>(<span class="dv">30</span>, <span class="at">sd =</span> <span class="dv">10</span>)                                      <span class="co"># Temperature</span></span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>    I[i] <span class="sc">~</span> <span class="fu">dnorm</span>(<span class="dv">200</span> <span class="sc">+</span> <span class="dv">5</span> <span class="sc">*</span> T[i], <span class="at">sd =</span> <span class="dv">20</span>)                          <span class="co"># Ice cream sales</span></span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a>    S[i] <span class="sc">~</span> <span class="fu">dpois</span>(<span class="fl">0.3</span> <span class="sc">+</span> <span class="fl">0.05</span> <span class="sc">*</span> T[i])                                <span class="co"># Shark attacks</span></span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>constants <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">N =</span> n)</span>
+<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a>inits <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">T =</span> <span class="fu">rep</span>(<span class="dv">30</span>, n), <span class="at">I =</span> <span class="fu">rep</span>(<span class="dv">400</span>, n), <span class="at">S =</span> <span class="fu">rep</span>(<span class="dv">2</span>, n))</span>
+<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">nimbleModel</span>(model_code, <span class="at">constants =</span> constants, <span class="at">inits =</span> inits)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Defining model</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Building model</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Setting data and initial values</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Running calculate on model
+  [Note] Any error reports that follow may simply reflect missing values in model variables.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Checking model sizes and dimensions</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>cmod <span class="ot">&lt;-</span> <span class="fu">compileNimble</span>(mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Compiling
+  [Note] This may take a minute.
+  [Note] Use 'showCompilerOutput = TRUE' to see C++ compilation details.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>cmod<span class="sc">$</span><span class="fu">simulate</span>(<span class="at">includeData =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>nim_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">T =</span> cmod<span class="sc">$</span>T,</span>
+<span id="cb68-4"><a href="#cb68-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">I =</span> cmod<span class="sc">$</span>I,</span>
+<span id="cb68-5"><a href="#cb68-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">S =</span> cmod<span class="sc">$</span>S</span>
+<span id="cb68-6"><a href="#cb68-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb68-7"><a href="#cb68-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-8"><a href="#cb68-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(nim_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["T"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["I"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["S"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"43.71","2":"439.1","3":"4","_rn_":"1"},{"1":"24.35","2":"323.7","3":"0","_rn_":"2"},{"1":"33.63","2":"370.9","3":"1","_rn_":"3"},{"1":"36.33","2":"399.3","3":"2","_rn_":"4"},{"1":"34.04","2":"349.6","3":"1","_rn_":"5"},{"1":"28.94","2":"364.2","3":"1","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
 </section>
 
 </main>
