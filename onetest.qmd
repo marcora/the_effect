@@ -1,0 +1,207 @@
+---
+title: "onetest"
+format:
+  html:
+    df-print: kable
+editor: source
+bibliography: references.bib
+---
+
+## One test to rule them all
+
+### Parametric bootstrapping under the null
+
+```{r}
+#| output: false
+library(tidyverse)
+library(ggformula)
+library(mosaic)
+library(rstanarm)
+library(posterior)
+library(bayesplot)
+theme_set(theme_minimal())
+set.seed(123)
+```
+
+```{r}
+N <- 10
+M <- 1000
+
+# Simulate two groups
+d <- tibble(A = rnorm(N, mean = 50, sd = 10),
+            B = rnorm(N, mean = 60, sd = 10)) |>
+  pivot_longer(cols = everything(),
+               names_to = "X",
+               values_to = "Y") |>
+  arrange(X)
+
+d
+```
+
+```{r}
+# Calculate observed difference in means
+obs_diff <- diff(favstats(Y ~ X, data = d)$mean)
+
+obs_diff
+```
+
+```{r}
+# Show t-test p-value for reference
+t.test(Y ~ X, data = d, var.equal = TRUE)$p.value
+```
+
+```{r}
+# Estimate null distribution parameters
+pooled_mean <- mean(d$Y)
+pooled_sd   <- sd(d$Y)  # Assumes equal variance
+```
+
+```{r}
+# Simulate null distribution: assume no difference
+parm <- do(M) * {
+  A <- rnorm(N, mean = pooled_mean, sd = pooled_sd)
+  B <- rnorm(N, mean = pooled_mean, sd = pooled_sd)
+  diff = mean(A) - mean(B)
+  tibble(diff)
+}
+```
+
+```{r}
+# Calculate p-value as the proportion of simulated diffs as extreme as observed
+parm |> summarize(p_val = mean(abs(diff) >= abs(obs_diff))) |> pull(p_val)
+```
+
+```{r}
+gf_density( ~ diff, data = parm) %>%
+  gf_vline(xintercept = ~ obs_diff, color = "red") %>%
+  gf_vline(xintercept = ~ -obs_diff, color = "red")
+```
+
+### Non-parametric permutation testing
+
+```{r}
+# Run permutation test
+perm <- do(M) * {
+  d_shuffled <- d |> mutate(X_perm = sample(X))  # shuffle group labels
+  perm_diff <- diff(favstats(Y ~ X_perm, data = d_shuffled)$mean)
+  tibble(diff = perm_diff)
+}
+```
+
+```{r}
+# Compute two-sided p-value
+perm |> summarize(p_val = mean(abs(diff) >= abs(obs_diff))) |> pull(p_val)
+```
+
+```{r}
+gf_density( ~ diff, data = perm) %>%
+  gf_vline(xintercept = ~ obs_diff, color = "red") %>%
+  gf_vline(xintercept = ~ -obs_diff, color = "red")
+```
+
+-   This test does not assume normality or equal variances like the parametric one does.
+
+-   It assumes the labels (group assignments) are exchangeable under the null hypothesis (i.e., no effect of group).
+
+-   You could extend this easily to other test statistics, such as differences in medians, or even t-statistics.
+
+```{r}
+# Compute observed t-statistic (Welch’s)
+obs_t <- t.test(Y ~ X, data = d)$statistic
+
+# Permutation test using t-statistic
+perm_t <- do(M) * {
+  d_shuffled <- d |>
+    mutate(X_perm = sample(X))  # Shuffle labels
+  
+  t_val <- t.test(Y ~ X_perm, data = d_shuffled)$statistic
+  tibble(t = t_val)
+}
+```
+
+```{r}
+# Two-sided permutation p-value
+perm_t |> summarize(p_val = mean(abs(t) >= abs(obs_t))) |> pull(p_val)
+```
+
+```{r}
+gf_density( ~ t, data = perm_t) %>%
+  gf_vline(xintercept = ~ obs_t, color = "red") %>%
+  gf_vline(xintercept = ~ -obs_t, color = "red")
+```
+
+| Approach | Assumes Normality | Assumes Equal Variance | Null Distribution Source | Test Statistic | Flexibility / Robustness | P-value Computation |
+|-----------|-----------|-----------|-----------|-----------|-----------|-----------|
+| Classical t-test | Yes | Yes (Student's t) | Theoretical t-distribution | t-statistic | Low (sensitive to assumptions) | Analytical from t-distribution |
+| Parametric Simulation | Yes | Yes (via sd) | Simulated from `rnorm()` under H₀ | Difference in means | Moderate (assumes model) | Proportion of extreme simulated diffs |
+| Permutation Test (Diff in Means) | No | No | Empirical from permuted label diffs | Difference in means | High (non-parametric) | Proportion of extreme permuted diffs |
+| Permutation Test (t-statistic) | No | No | Empirical from permuted label t-stats | t-statistic | High (non-parametric) | Proportion of extreme permuted t-stats |
+
+Non-parametric resampling methods like **non-parametric bootstrapping** and **permutation testing** are extremely flexible and powerful, but they *do* have limitations — particularly when compared to well-specified **parametric methods**. Here’s a summary of when and why **resampling methods start to lose ground**:
+
+-   The sample is too small (n \< 10) or unrepresentative
+
+-   Data are not i.i.d. (time series, clustered/longitudinal data, multilevel/hierarchical data)
+
+-   Data are high-dimensional (violate exchangeability for permutation)
+
+-   Inference tasks are complex or causal
+
+-   Parametric assumptions are justified (the true data-generating process is known or well-approximated), in which case parametric methods yield more efficient and exact estimates
+
+In basic contexts (e.g. estimating the mean or median), nonparametric bootstrapping (resampling the data with replacement) doesn’t rely on distributional assumptions — you're letting the data “speak for themselves” by treating your sample as a stand-in for the population/distribution. However, the moment you bootstrap model-based test statistics or estimates, you implicitly or explicitly rely on the model structure/assumptions.
+
+| **Total Sample Size** | **Bootstrap Usefulness**                   |
+|-----------------------|--------------------------------------------|
+| $n < 10$              | ❌ Very limited utility                    |
+| $10 \leq n < 30$      | ⚠️ Use with caution; sensitive to outliers |
+| $n \geq 30$           | ✅ Reasonably stable                       |
+| $n \gg 100$           | ✅ Very stable, less needed                |
+
+### "Poor man's posterior"
+
+The “poor man’s posterior” is a nickname for the bootstrap distribution of an estimator obtained by resampling the observed data with replacement. This distribution is treated as a proxy for the posterior distribution of the parameter under non-informative prior.
+
+The “poor man’s posterior” is philosophically Bayesian-like, but technically frequentist, and lacks the full apparatus of Bayesian modeling (e.g., prior specification, model-based posterior inference).
+
+```{r}
+# Poor man's posterior
+boot_df <- do(M) * {
+  d |>
+    group_by(X) |>
+    slice_sample(n = N, replace = TRUE) |>
+    summarise(mean_Y = mean(Y), .groups = "drop") |>
+    pivot_wider(names_from = X, values_from = mean_Y) |>
+    mutate(boot_diff = B - A) |>
+    select(boot_diff)
+}
+```
+
+```{r}
+#| output: false
+# Bayesian posterior
+bayes_df <- stan_glm(
+  Y ~ X,
+  data = d,
+  prior = NULL,
+  prior_intercept = NULL,
+  chains = 2,
+  iter = M,
+  seed = 123
+) |>
+  as_draws_df() |>
+  select(XB) |>
+  rename(bayes_diff = XB)
+```
+
+```{r}
+df <- bind_cols(bayes_df, boot_df)
+
+summarise_draws(df)
+
+mcmc_areas(df)
+```
+
+> In this sense, the bootstrap distribution represents an (approximate) nonparametric, noninformative posterior distribution for our parameter. But this bootstrap distribution is obtained painlessly — without having to formally specify a prior and without having to sample from the posterior distribution. Hence we might think of the bootstrap distribution as a “poor man’s” Bayes posterior. By perturbing the data, the bootstrap approximates the Bayesian effect of perturbing the parameters, and is typically much simpler to carry out.
+
+@hastie2009
