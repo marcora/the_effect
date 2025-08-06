@@ -19,6 +19,22 @@ theme_set(theme_minimal())
 set.seed(666)
 ```
 
+## Identifiability
+
+Identification without confounding
+
+![](images/clipboard-3165771262.png)
+
+Identification with confounding:
+
+![](images/clipboard-3779750103.png)
+
+## The do operator
+
+![](images/clipboard-3734840045.png)
+
+$P(Y = y \mid \text{do}(T = t))$ or $P(y \mid \text{do}(t))$ is the probability of $Y = y$ if we intervene to set $T = t$
+
 ## Data Generating Process
 
 Let’s generate some data. A good way to think about how DGPs can help with research is to cheat a little and make some data where we know the data generating process for sure.
@@ -71,6 +87,8 @@ exp(mean(logincome ~ factor(brownhair), data = sim_dat))
 
 ### Simulation using DAG
 
+#### simDAG
+
 ```{r}
 dag <- empty_dag() +
   node("college", type = "rbernoulli", p = 0.3) +
@@ -98,34 +116,7 @@ gf_density(~ logincome, fill = ~ factor(brownhair), data = dag_dat)
 exp(mean(logincome ~ factor(brownhair), data = dag_dat))
 ```
 
-## Identifiability
-
-Identification without confounding
-
-![](images/clipboard-3165771262.png)
-
-Identification with confounding:
-
-![](images/clipboard-3779750103.png)
-
-## The do operator
-
-![](images/clipboard-3734840045.png)
-
-$P(Y = y \mid \text{do}(T = t))$ or $P(y \mid \text{do}(t))$ is the probability of $Y = y$ if we intervene to set $T = t$
-
-```{r}
-ss <- expand_grid(
-  T = 0:1,
-  Y = 0:100)
-
-ss <- ss |> 
-  mutate(
-    p_unnorm = dnorm(Y, mean = 50 + 10 * T, sd = 10),
-    p = p_unnorm / sum(p_unnorm))
-
-ss
-```
+#### R6causal
 
 ```{r}
 library(R6causal)
@@ -154,6 +145,8 @@ SCM_model$intervene("X", 3)
 data_do <- SCM_model$simulate(100)
 ```
 
+#### visreg
+
 ```{r}
 set.seed(123)
 n <- 1000
@@ -178,6 +171,8 @@ fit2 <- glm(Y ~ X * Z, data = dat)
 visreg(fit2, "X", by = "Z")
 ```
 
+#### simcausal
+
 ```{r}
 library(simcausal)
 D <- DAG.empty() +
@@ -189,54 +184,7 @@ dat <- sim(D, n=200)
 plotDAG(D)
 ```
 
-```{r}
-library(dosearch)
-# back-door formula
-data <- "p(x,y,z)"
-query <- "p(y|do(x))"
-graph <- "
-  x -> y
-  z -> x
-  z -> y
-"
-dosearch(data, query, graph)
-#> \sum_{z}\left(p(z)p(y|x,z)\right)
-
-# front-door formula
-graph <- "
-  x -> z
-  z -> y
-  x <-> y
-"
-dosearch(data, query, graph)
-#> \sum_{z}\left(p(z|x)\sum_{x}\left(p(x)p(y|z,x)\right)\right)
-
-# the 'napkin' graph
-data <- "p(x,y,z,w)"
-graph <- "
-  x -> y
-  z -> x
-  w -> z
-  x <-> w
-  w <-> y
-"
-dosearch(data, query, graph)
-#> \frac{\sum_{w}\left(p(w)p(y,x|z,w)\right)}{\sum_{y}\sum_{w}\left(p(w)p(y,x|z,w)\right)}
-
-# case-control design
-data <- "
-  p(x*,y*,r_x,r_y)
-  p(y)
-"
-graph <- "
-  x -> y
-  y -> r_y
-  r_y -> r_x
-"
-md <- "r_x : x, r_y : y"
-dosearch(data, query, graph, missing_data = md)
-#> \frac{\left(p(y)p(x|r_x = 1,y,r_y = 1)\right)}{\sum_{y}\left(p(y)p(x|r_x = 1,y,r_y = 1)\right)}
-```
+#### R6causal
 
 ```{r}
 library(R6causal)
@@ -257,6 +205,8 @@ icecream_scm$simulate(500)
 sim_r6c <- icecream_scm$simdata
 head(sim_r6c)
 ```
+
+#### nimble
 
 ```{r}
 library(nimble)
@@ -346,59 +296,6 @@ adjustmentSets(dag, exposure = "sex", outcome = "weight", effect = "direct")  # 
 ```
 
 https://setosa.io/simpsons/
-
-```{r}
-# original long-form data
-df <- tibble(
-  a = rnorm(10, mean = 5, sd = 3),
-  b = rnorm(10, mean = 10, sd = 3)
-) |> 
-  pivot_longer(cols = everything(), names_to = "grp", values_to = "val")
-
-# Number of bootstrap replicates
-n_boot <- 1000
-
-# Bootstrap difference in means
-boot_dist <- tibble(
-  boot_id = 1:n_boot
-) |> 
-  mutate(
-    diff = map_dbl(boot_id, ~{
-      df |> 
-        group_by(grp) |> 
-        slice_sample(n = n(), replace = TRUE) |> 
-        summarise(mean_val = mean(val), .groups = "drop") |> 
-        pivot_wider(names_from = grp, values_from = mean_val) |> 
-        summarise(diff = b - a) |> 
-        pull(diff)
-    })
-  )
-
-# View summary
-boot_dist |> 
-  summarise(
-    mean_diff = mean(diff),
-    lower_ci = quantile(diff, 0.025),
-    upper_ci = quantile(diff, 0.975)
-  )
-```
-
-```{r}
-library(emmeans)
-
-fit <- lm(val ~ grp, data = df)
-
-emmeans(fit, revpairwise ~ grp) |> confint()
-```
-
-```{r}
-library(rstanarm)
-options(mc.cores = parallel::detectCores())
-
-fit <- stan_glm(val ~ grp, data = df)
-
-emmeans(fit, revpairwise ~ grp) |> confint()
-```
 
 ```{r}
 # Load necessary libraries
