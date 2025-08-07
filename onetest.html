@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>onetest</title>
+<title>One test to rule them all</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -122,15 +122,25 @@ window.Quarto = {
 
 </head>
 
-<body class="fullcontent quarto-light">
+<body class="quarto-light">
 
 <div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
-
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#parametric-bootstrapping-of-estimator-under-the-null" id="toc-parametric-bootstrapping-of-estimator-under-the-null" class="nav-link active" data-scroll-target="#parametric-bootstrapping-of-estimator-under-the-null">Parametric bootstrapping of estimator under the null</a></li>
+  <li><a href="#non-parametric-permutation-testing" id="toc-non-parametric-permutation-testing" class="nav-link" data-scroll-target="#non-parametric-permutation-testing">Non-parametric permutation testing</a></li>
+  <li><a href="#poor-mans-posterior-non-parametric-bootstrapping-of-estimator" id="toc-poor-mans-posterior-non-parametric-bootstrapping-of-estimator" class="nav-link" data-scroll-target="#poor-mans-posterior-non-parametric-bootstrapping-of-estimator">“Poor man’s posterior”: Non-parametric bootstrapping of estimator</a></li>
+  </ul>
+</nav>
+</div>
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">onetest</h1>
+<h1 class="title">One test to rule them all</h1>
 </div>
 
 
@@ -147,10 +157,8 @@ window.Quarto = {
 </header>
 
 
-<section id="one-test-to-rule-them-all" class="level2">
-<h2 class="anchored" data-anchor-id="one-test-to-rule-them-all">One test to rule them all</h2>
-<section id="parametric-bootstrapping-under-the-null" class="level3">
-<h3 class="anchored" data-anchor-id="parametric-bootstrapping-under-the-null">Parametric bootstrapping under the null</h3>
+<section id="parametric-bootstrapping-of-estimator-under-the-null" class="level2">
+<h2 class="anchored" data-anchor-id="parametric-bootstrapping-of-estimator-under-the-null">Parametric bootstrapping of estimator under the null</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggformula)</span>
@@ -274,11 +282,12 @@ window.Quarto = {
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate observed difference in means</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>obs_diff <span class="ot">&lt;-</span> <span class="fu">diff</span>(<span class="fu">favstats</span>(Y <span class="sc">~</span> X, <span class="at">data =</span> d)<span class="sc">$</span>mean)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>obs_diff <span class="ot">&lt;-</span> <span class="fu">diff</span>(<span class="fu">mean</span>(Y <span class="sc">~</span> X, <span class="at">data =</span> d))</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>obs_diff</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 11.95</code></pre>
+<pre><code>    B 
+11.95 </code></pre>
 </div>
 </div>
 <div class="cell">
@@ -304,7 +313,7 @@ window.Quarto = {
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate p-value as the proportion of simulated diffs as extreme as observed</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>parm <span class="sc">|&gt;</span> <span class="fu">summarize</span>(<span class="at">p_val =</span> <span class="fu">mean</span>(<span class="fu">abs</span>(diff) <span class="sc">&gt;=</span> <span class="fu">abs</span>(obs_diff))) <span class="sc">|&gt;</span> <span class="fu">pull</span>(p_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>parm <span class="sc">|&gt;</span> <span class="fu">summarize</span>(<span class="at">p.value =</span> <span class="fu">mean</span>(<span class="fu">abs</span>(diff) <span class="sc">&gt;=</span> <span class="fu">abs</span>(obs_diff))) <span class="sc">|&gt;</span> <span class="fu">pull</span>(p.value)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.062</code></pre>
 </div>
@@ -322,19 +331,15 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="non-parametric-permutation-testing" class="level3">
-<h3 class="anchored" data-anchor-id="non-parametric-permutation-testing">Non-parametric permutation testing</h3>
+<section id="non-parametric-permutation-testing" class="level2">
+<h2 class="anchored" data-anchor-id="non-parametric-permutation-testing">Non-parametric permutation testing</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run permutation test</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>perm <span class="ot">&lt;-</span> <span class="fu">do</span>(M) <span class="sc">*</span> {</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  d_shuffled <span class="ot">&lt;-</span> d <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">X_perm =</span> <span class="fu">sample</span>(X))  <span class="co"># shuffle group labels</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  perm_diff <span class="ot">&lt;-</span> <span class="fu">diff</span>(<span class="fu">favstats</span>(Y <span class="sc">~</span> X_perm, <span class="at">data =</span> d_shuffled)<span class="sc">$</span>mean)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">diff =</span> perm_diff)</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>perm <span class="ot">&lt;-</span> <span class="fu">do</span>(M) <span class="sc">*</span> <span class="fu">list</span>(<span class="at">diff =</span> <span class="fu">diff</span>(<span class="fu">mean</span>(Y <span class="sc">~</span> <span class="fu">shuffle</span>(X), <span class="at">data =</span> d)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute two-sided p-value</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>perm <span class="sc">|&gt;</span> <span class="fu">summarize</span>(<span class="at">p_val =</span> <span class="fu">mean</span>(<span class="fu">abs</span>(diff) <span class="sc">&gt;=</span> <span class="fu">abs</span>(obs_diff))) <span class="sc">|&gt;</span> <span class="fu">pull</span>(p_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>perm <span class="sc">|&gt;</span> <span class="fu">summarize</span>(<span class="at">p.value =</span> <span class="fu">mean</span>(<span class="fu">abs</span>(diff) <span class="sc">&gt;=</span> <span class="fu">abs</span>(obs_diff))) <span class="sc">|&gt;</span> <span class="fu">pull</span>(p.value)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.067</code></pre>
 </div>
@@ -358,18 +363,14 @@ window.Quarto = {
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute observed t-statistic (Welch’s)</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>obs_t <span class="ot">&lt;-</span> <span class="fu">t.test</span>(Y <span class="sc">~</span> X, <span class="at">data =</span> d)<span class="sc">$</span>statistic</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>obs_t <span class="ot">&lt;-</span> <span class="fu">t.test</span>(Y <span class="sc">~</span> X, <span class="at">data =</span> d, <span class="at">var.equal =</span> <span class="cn">TRUE</span>)<span class="sc">$</span>statistic</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Permutation test using t-statistic</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>perm_t <span class="ot">&lt;-</span> <span class="fu">do</span>(M) <span class="sc">*</span> {</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  d_shuffled <span class="ot">&lt;-</span> d <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">X_perm =</span> <span class="fu">sample</span>(X))  <span class="co"># Shuffle labels</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  t_val <span class="ot">&lt;-</span> <span class="fu">t.test</span>(Y <span class="sc">~</span> X_perm, <span class="at">data =</span> d_shuffled)<span class="sc">$</span>statistic</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">t =</span> t_val)</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>perm_t <span class="ot">&lt;-</span> <span class="fu">do</span>(M) <span class="sc">*</span> <span class="fu">t.test</span>(Y <span class="sc">~</span> <span class="fu">shuffle</span>(X), <span class="at">data =</span> d, <span class="at">var.equal =</span> <span class="cn">TRUE</span>)<span class="sc">$</span>statistic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Two-sided permutation p-value</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>perm_t <span class="sc">|&gt;</span> <span class="fu">summarize</span>(<span class="at">p_val =</span> <span class="fu">mean</span>(<span class="fu">abs</span>(t) <span class="sc">&gt;=</span> <span class="fu">abs</span>(obs_t))) <span class="sc">|&gt;</span> <span class="fu">pull</span>(p_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>perm_t <span class="sc">|&gt;</span> <span class="fu">summarize</span>(<span class="at">p.value =</span> <span class="fu">mean</span>(<span class="fu">abs</span>(t) <span class="sc">&gt;=</span> <span class="fu">abs</span>(obs_t))) <span class="sc">|&gt;</span> <span class="fu">pull</span>(p.value)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.071</code></pre>
 </div>
@@ -482,22 +483,13 @@ window.Quarto = {
 </tbody>
 </table>
 </section>
-<section id="poor-mans-posterior" class="level3">
-<h3 class="anchored" data-anchor-id="poor-mans-posterior">“Poor man’s posterior”</h3>
+<section id="poor-mans-posterior-non-parametric-bootstrapping-of-estimator" class="level2">
+<h2 class="anchored" data-anchor-id="poor-mans-posterior-non-parametric-bootstrapping-of-estimator">“Poor man’s posterior”: Non-parametric bootstrapping of estimator</h2>
 <p>The “poor man’s posterior” is a nickname for the bootstrap distribution of an estimator obtained by resampling the observed data with replacement. This distribution is treated as a proxy for the posterior distribution of the parameter under non-informative prior.</p>
 <p>The “poor man’s posterior” is philosophically Bayesian-like, but technically frequentist, and lacks the full apparatus of Bayesian modeling (e.g., prior specification, model-based posterior inference).</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Poor man's posterior</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>boot_df <span class="ot">&lt;-</span> <span class="fu">do</span>(M) <span class="sc">*</span> {</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  d <span class="sc">|&gt;</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(X) <span class="sc">|&gt;</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice_sample</span>(<span class="at">n =</span> N, <span class="at">replace =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">mean_Y =</span> <span class="fu">mean</span>(Y)) <span class="sc">|&gt;</span></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> X, <span class="at">values_from =</span> mean_Y) <span class="sc">|&gt;</span></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">boot_diff =</span> B <span class="sc">-</span> A) <span class="sc">|&gt;</span></span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(boot_diff)</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>boot_df <span class="ot">&lt;-</span> <span class="fu">do</span>(M) <span class="sc">*</span> <span class="fu">list</span>(<span class="at">boot_diff =</span> <span class="fu">diff</span>(<span class="fu">mean</span>(Y <span class="sc">~</span> X, <span class="at">data =</span> <span class="fu">resample</span>(d, <span class="at">groups =</span> X))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Bayesian posterior</span></span>
@@ -591,7 +583,6 @@ window.Quarto = {
 </blockquote>
 <p><span class="citation" data-cites="hastie2009">Hastie, Tibshirani, and Friedman (<a href="#ref-hastie2009" role="doc-biblioref">2009</a>)</span></p>
 
-</section>
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">

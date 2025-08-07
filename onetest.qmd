@@ -1,15 +1,14 @@
 ---
-title: "onetest"
+title: "One test to rule them all"
 format:
   html:
     df-print: kable
+    toc: true
 editor: source
 bibliography: references.bib
 ---
 
-## One test to rule them all
-
-### Parametric bootstrapping under the null
+## Parametric bootstrapping of estimator under the null
 
 ```{r}
 #| output: false
@@ -43,7 +42,7 @@ d
 
 ```{r}
 # Calculate observed difference in means
-obs_diff <- diff(favstats(Y ~ X, data = d)$mean)
+obs_diff <- diff(mean(Y ~ X, data = d))
 
 obs_diff
 ```
@@ -71,7 +70,7 @@ parm <- do(M) * {
 
 ```{r}
 # Calculate p-value as the proportion of simulated diffs as extreme as observed
-parm |> summarize(p_val = mean(abs(diff) >= abs(obs_diff))) |> pull(p_val)
+parm |> summarize(p.value = mean(abs(diff) >= abs(obs_diff))) |> pull(p.value)
 ```
 
 ```{r}
@@ -80,20 +79,16 @@ mcmc_areas(parm, prob = 0.95) |>
   gf_vline(xintercept = ~ -obs_diff, color = "red")
 ```
 
-### Non-parametric permutation testing
+## Non-parametric permutation testing
 
 ```{r}
 # Run permutation test
-perm <- do(M) * {
-  d_shuffled <- d |> mutate(X_perm = sample(X))  # shuffle group labels
-  perm_diff <- diff(favstats(Y ~ X_perm, data = d_shuffled)$mean)
-  tibble(diff = perm_diff)
-}
+perm <- do(M) * list(diff = diff(mean(Y ~ shuffle(X), data = d)))
 ```
 
 ```{r}
 # Compute two-sided p-value
-perm |> summarize(p_val = mean(abs(diff) >= abs(obs_diff))) |> pull(p_val)
+perm |> summarize(p.value = mean(abs(diff) >= abs(obs_diff))) |> pull(p.value)
 ```
 
 ```{r}
@@ -110,19 +105,15 @@ mcmc_areas(perm, prob = 0.95) |>
 
 ```{r}
 # Compute observed t-statistic (Welch’s)
-obs_t <- t.test(Y ~ X, data = d)$statistic
+obs_t <- t.test(Y ~ X, data = d, var.equal = TRUE)$statistic
 
 # Permutation test using t-statistic
-perm_t <- do(M) * {
-  d_shuffled <- d |> mutate(X_perm = sample(X))  # Shuffle labels
-  t_val <- t.test(Y ~ X_perm, data = d_shuffled)$statistic
-  tibble(t = t_val)
-}
+perm_t <- do(M) * t.test(Y ~ shuffle(X), data = d, var.equal = TRUE)$statistic
 ```
 
 ```{r}
 # Two-sided permutation p-value
-perm_t |> summarize(p_val = mean(abs(t) >= abs(obs_t))) |> pull(p_val)
+perm_t |> summarize(p.value = mean(abs(t) >= abs(obs_t))) |> pull(p.value)
 ```
 
 ```{r}
@@ -159,7 +150,7 @@ In basic contexts (e.g. estimating the mean or median), nonparametric bootstrapp
 | $n \geq 30$           | ✅ Reasonably stable                       |
 | $n \gg 100$           | ✅ Very stable, less needed                |
 
-### "Poor man's posterior"
+## "Poor man's posterior": Non-parametric bootstrapping of estimator
 
 The “poor man’s posterior” is a nickname for the bootstrap distribution of an estimator obtained by resampling the observed data with replacement. This distribution is treated as a proxy for the posterior distribution of the parameter under non-informative prior.
 
@@ -167,16 +158,7 @@ The “poor man’s posterior” is philosophically Bayesian-like, but technical
 
 ```{r}
 # Poor man's posterior
-boot_df <- do(M) * {
-  d |>
-    group_by(X) |>
-    slice_sample(n = N, replace = TRUE) |>
-    summarise(mean_Y = mean(Y)) |>
-    ungroup() |>
-    pivot_wider(names_from = X, values_from = mean_Y) |>
-    mutate(boot_diff = B - A) |>
-    select(boot_diff)
-}
+boot_df <- do(M) * list(boot_diff = diff(mean(Y ~ X, data = resample(d, groups = X))))
 ```
 
 ```{r}
