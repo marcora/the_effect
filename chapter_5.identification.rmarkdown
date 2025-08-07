@@ -1,0 +1,318 @@
+---
+title: "chapter_5.identification"
+format:
+  html:
+    df-print: paged
+    toc: true
+---
+
+## Setup environment
+
+```{r}
+#| output: false
+library(tidyverse)
+library(ggformula)
+library(simDAG)
+library(emmeans)
+
+theme_set(theme_minimal())
+set.seed(666)
+```
+
+## Identifiability
+
+Identification without confounding
+
+![](images/clipboard-3165771262.png)
+
+Identification with confounding:
+
+![](images/clipboard-3779750103.png)
+
+## The do operator
+
+![](images/clipboard-3734840045.png)
+
+$P(Y = y \mid \text{do}(T = t))$ or $P(y \mid \text{do}(t))$ is the probability of $Y = y$ if we intervene to set $T = t$
+
+## Data Generating Process
+
+Let’s generate some data. A good way to think about how DGPs can help with research is to cheat a little and make some data where we know the data generating process for sure.
+
+In the world that we’re crafting, these will be the laws:
+
+-   Income is log-normally distributed
+
+-   30% of people have college degrees
+
+-   20% of people are naturally brown-haired (i.e., 80% are NOT naturally brown-haired)
+
+-   40% of people who don’t have brown hair OR a college degree will choose to dye their hair brown
+
+-   Being brown-haired gives you a 10% (log)income boost
+
+-   Having a college degree gives you a 20% (log)income boost
+
+Let’s say that we have some data that has been generated from these laws, but we have *no idea* what the laws are.
+
+### Simulation using RNG
+
+```{r}
+n <- 1000
+
+college <- rbinom(n, size = 1, prob = .3)
+brownhair <- rbinom(n, size = 1, prob = .2 + .8 * .4 * (college == 0))
+logincome <- rnorm(n, mean = 4 + .1 * brownhair + .2 * college, sd = .1)
+
+sim_dat <- tibble(college, brownhair, logincome)
+
+sim_dat
+```
+
+```{r}
+lm(logincome ~ factor(brownhair), data = sim_dat)
+
+lm(logincome ~ factor(brownhair) + factor(college), data = sim_dat)
+```
+
+Now let’s say we’re interested in the effect of being brown-haired on income. We might start by looking at the distribution of income by whether someone is brown-haired or not, or by just looking at average income by hair color.
+
+```{r}
+gf_density(~ logincome, fill = ~ factor(brownhair), data = sim_dat)
+```
+
+```{r}
+exp(mean(logincome ~ factor(brownhair), data = sim_dat))
+```
+
+### Simulation using DAG
+
+#### simDAG
+
+```{r}
+dag <- empty_dag() +
+  node("college", type = "rbernoulli", p = 0.3) +
+  node("brownhair", type = "binomial", formula = ~ .2 + .32 * college) +
+  node("logincome", type = "gaussian", formula = ~ 4 + .1 * brownhair + .2 * college, error = .1)
+
+plot(dag)
+
+dag_dat <- sim_from_dag(dag, n_sim = 1000)
+
+dag_dat
+```
+
+```{r}
+lm(logincome ~ factor(brownhair), data = dag_dat)
+
+lm(logincome ~ factor(brownhair) + factor(college), data = dag_dat)
+```
+
+```{r}
+gf_density(~ logincome, fill = ~ factor(brownhair), data = dag_dat)
+```
+
+```{r}
+exp(mean(logincome ~ factor(brownhair), data = dag_dat))
+```
+
+#### R6causal
+
+```{r}
+library(R6causal)
+
+SCM_model <- SCM$new(
+  uflist = list(
+    Uz = function(n) { runif(n) },
+    Ux = function(n) { runif(n) },
+    Uy = function(n) { runif(n) }
+ ),
+  vflist = list(
+    Z = function(Uz) { Uz },                  # Exogenous variable Z (noise Uz)
+    X = function(Z, Ux) { Z + Ux },           # X depends on Z + its own noise
+    Y = function(X, Uy) { 2 * X + Uy }        # Y depends on X + its own noise
+  )
+)
+
+SCM_model$plot()
+
+data <- SCM_model$simulate(100)
+
+SCM_model$simdata
+
+SCM_model$intervene("X", 3)
+
+data_do <- SCM_model$simulate(100)
+```
+
+#### visreg
+
+```{r}
+set.seed(123)
+n <- 1000
+Z <- rnorm(n)                      # a confounder
+X <- rbinom(n, 1, plogis(0.5*Z))   # treatment assignment depends on Z
+Y <- 2*X + 1*Z + rnorm(n)          # outcome generated with a causal effect of X (2 units)
+dat <- data.frame(Y, X, Z)
+
+fit <- glm(Y ~ X + Z, data = dat)
+summary(fit)
+```
+
+```{r}
+library(visreg)
+
+visreg(fit, "X", ylab = "Y (adjusted)", xlab = "Treatment (X)")
+
+visreg(fit, "Z", ylab = "Y (adjusted)", xlab = "Confounder (Z)")
+
+fit2 <- glm(Y ~ X * Z, data = dat)
+
+visreg(fit2, "X", by = "Z")
+```
+
+#### simcausal
+
+```{r}
+library(simcausal)
+D <- DAG.empty() +
+  node("W", distr = "rnorm", mean = 0, sd = 1) +
+  node("A", distr = "rbinom", size = 1, prob = plogis(W)) +
+  node("Y", distr = "rnorm", mean = A + W)
+D <- set.DAG(D)
+dat <- sim(D, n=200)
+plotDAG(D)
+```
+
+#### R6causal
+
+```{r}
+library(R6causal)
+set.seed(1)
+
+# Specify unobserved (latent/noise) and observed variables as named lists
+uflist <- list(
+  ut = function(n) rnorm(n, mean = 0, sd = 1)   # noise for temperature
+)
+vflist <- list(
+  T = function(ut) 30 + 10*ut,                                      # Temperature (confounder)
+  I = function(T) 200 + 5*T + rnorm(length(T), sd = 20),            # Ice cream sales
+  S = function(T) rpois(length(T), lambda = 0.3 + 0.05*T)           # Shark attacks
+)
+
+icecream_scm <- SCM$new(uflist = uflist, vflist = vflist)
+icecream_scm$simulate(500)
+sim_r6c <- icecream_scm$simdata
+head(sim_r6c)
+```
+
+#### nimble
+
+```{r}
+library(nimble)
+set.seed(42)
+
+n <- 500
+model_code <- nimbleCode({
+  for (i in 1:N) {
+    T[i] ~ dnorm(30, sd = 10)                                      # Temperature
+    I[i] ~ dnorm(200 + 5 * T[i], sd = 20)                          # Ice cream sales
+    S[i] ~ dpois(0.3 + 0.05 * T[i])                                # Shark attacks
+  }
+})
+
+constants <- list(N = n)
+inits <- list(T = rep(30, n), I = rep(400, n), S = rep(2, n))
+
+mod <- nimbleModel(model_code, constants = constants, inits = inits)
+cmod <- compileNimble(mod)
+cmod$simulate(includeData = TRUE)
+nim_data <- data.frame(
+  T = cmod$T,
+  I = cmod$I,
+  S = cmod$S
+)
+
+head(nim_data)
+```
+
+## Visualizing the effect of a categorical variable adjusted for another variable
+
+```{r}
+# Simulate data
+set.seed(123)
+n <- 200
+sex <- factor(sample(c("male", "female"), n, replace = TRUE))
+height <- rnorm(n, mean = ifelse(sex == "male", 175, 165), sd = 7)
+weight <- 0.5 * height + ifelse(sex == "male", 5, -5) + rnorm(n, 0, 5)
+
+# Create data frame
+df <- tibble(weight, height, sex)
+
+# Fit linear model
+model <- lm(weight ~ height + sex, data = df)
+
+# Extract adjusted data from visreg (type = "conditional" is default)
+v <- visreg(model, "sex", type = "conditional", plot = FALSE)
+
+# Partial residuals (adjusted data)
+df_res <- v$res  # contains: sex, visregRes (partial residual)
+
+# Model-adjusted means and CIs
+df_fit <- v$fit  # contains: sex, visregFit (mean), visregLwr, visregUpr
+
+# Plot
+ggplot() +
+  geom_jitter(data = df_res, aes(x = sex, y = visregRes), 
+              width = 0.1, alpha = 0.4) +
+  geom_point(data = df_fit, aes(x = sex, y = visregFit), 
+             size = 4, color = "red") +
+  geom_errorbar(data = df_fit, 
+                aes(x = sex, ymin = visregLwr, ymax = visregUpr), 
+                width = 0.15, color = "red") +
+  labs(title = "Effect of Sex on Weight (adjusted for Height)",
+       x = "Sex",
+       y = "Adjusted Weight (partial residuals + model fit)")
+```
+
+```{r}
+library(dagitty)
+
+# Define the DAG
+dag <- dagitty("
+dag {
+  sex -> height
+  height -> weight
+  sex -> weight
+}
+")
+
+# Print DAG
+plot(dag)
+
+# Query adjustment sets for effect of sex on weight
+adjustmentSets(dag, exposure = "sex", outcome = "weight")  # total effect of sex on weight → {}
+adjustmentSets(dag, exposure = "sex", outcome = "weight", effect = "direct")  # direct effect of sex on weight→ {height}
+```
+
+https://setosa.io/simpsons/
+
+```{r}
+# Load necessary libraries
+library(tidyverse)
+library(lme4)
+library(visreg)
+
+# Load the data
+data("sleepstudy", package = "lme4")
+
+# Inspect data
+head(sleepstudy)
+
+# Fit a mixed model: random intercept + slope for each Subject
+model <- lmer(Reaction ~ 1 + Days + (1 + Days | Subject), data = sleepstudy)
+
+# Use visreg to plot the fixed effect of Days (adjusted for random effects)
+visreg(model, "Days", type = "conditional", gg = TRUE) + theme_minimal()
+```
+

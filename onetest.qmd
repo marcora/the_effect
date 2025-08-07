@@ -19,6 +19,7 @@ library(mosaic)
 library(rstanarm)
 library(posterior)
 library(bayesplot)
+
 theme_set(theme_minimal())
 set.seed(123)
 ```
@@ -28,8 +29,9 @@ N <- 10
 M <- 1000
 
 # Simulate two groups
-d <- tibble(A = rnorm(N, mean = 50, sd = 10),
-            B = rnorm(N, mean = 60, sd = 10)) |>
+d <-
+  tibble(A = rnorm(N, mean = 50, sd = 10),
+         B = rnorm(N, mean = 60, sd = 10)) |>
   pivot_longer(cols = everything(),
                names_to = "X",
                values_to = "Y") |>
@@ -72,8 +74,8 @@ parm |> summarize(p_val = mean(abs(diff) >= abs(obs_diff))) |> pull(p_val)
 ```
 
 ```{r}
-gf_density( ~ diff, data = parm) %>%
-  gf_vline(xintercept = ~ obs_diff, color = "red") %>%
+gf_density( ~ diff, data = parm) |>
+  gf_vline(xintercept = ~ obs_diff, color = "red") |>
   gf_vline(xintercept = ~ -obs_diff, color = "red")
 ```
 
@@ -94,8 +96,8 @@ perm |> summarize(p_val = mean(abs(diff) >= abs(obs_diff))) |> pull(p_val)
 ```
 
 ```{r}
-gf_density( ~ diff, data = perm) %>%
-  gf_vline(xintercept = ~ obs_diff, color = "red") %>%
+gf_density( ~ diff, data = perm) |>
+  gf_vline(xintercept = ~ obs_diff, color = "red") |>
   gf_vline(xintercept = ~ -obs_diff, color = "red")
 ```
 
@@ -111,9 +113,7 @@ obs_t <- t.test(Y ~ X, data = d)$statistic
 
 # Permutation test using t-statistic
 perm_t <- do(M) * {
-  d_shuffled <- d |>
-    mutate(X_perm = sample(X))  # Shuffle labels
-  
+  d_shuffled <- d |> mutate(X_perm = sample(X))  # Shuffle labels
   t_val <- t.test(Y ~ X_perm, data = d_shuffled)$statistic
   tibble(t = t_val)
 }
@@ -125,8 +125,8 @@ perm_t |> summarize(p_val = mean(abs(t) >= abs(obs_t))) |> pull(p_val)
 ```
 
 ```{r}
-gf_density( ~ t, data = perm_t) %>%
-  gf_vline(xintercept = ~ obs_t, color = "red") %>%
+gf_density( ~ t, data = perm_t) |>
+  gf_vline(xintercept = ~ obs_t, color = "red") |>
   gf_vline(xintercept = ~ -obs_t, color = "red")
 ```
 
@@ -170,7 +170,8 @@ boot_df <- do(M) * {
   d |>
     group_by(X) |>
     slice_sample(n = N, replace = TRUE) |>
-    summarise(mean_Y = mean(Y), .groups = "drop") |>
+    summarise(mean_Y = mean(Y)) |>
+    ungroup() |>
     pivot_wider(names_from = X, values_from = mean_Y) |>
     mutate(boot_diff = B - A) |>
     select(boot_diff)
@@ -180,15 +181,16 @@ boot_df <- do(M) * {
 ```{r}
 #| output: false
 # Bayesian posterior
-bayes_df <- stan_glm(
-  Y ~ X,
-  data = d,
-  prior = NULL,
-  prior_intercept = NULL,
-  chains = 2,
-  iter = M,
-  seed = 123
-) |>
+bayes_df <-
+  stan_glm(
+    Y ~ X,
+    data = d,
+    prior = NULL,
+    prior_intercept = NULL,
+    chains = 2,
+    iter = M,
+    seed = 123
+  ) |>
   as_draws_df() |>
   select(XB) |>
   rename(bayes_diff = XB)
