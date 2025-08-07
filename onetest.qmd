@@ -21,7 +21,8 @@ library(posterior)
 library(bayesplot)
 
 theme_set(theme_minimal())
-set.seed(123)
+
+set.seed(666)
 ```
 
 ```{r}
@@ -74,7 +75,7 @@ parm |> summarize(p_val = mean(abs(diff) >= abs(obs_diff))) |> pull(p_val)
 ```
 
 ```{r}
-gf_density( ~ diff, data = parm) |>
+mcmc_areas(parm, prob = 0.95) |>
   gf_vline(xintercept = ~ obs_diff, color = "red") |>
   gf_vline(xintercept = ~ -obs_diff, color = "red")
 ```
@@ -96,7 +97,7 @@ perm |> summarize(p_val = mean(abs(diff) >= abs(obs_diff))) |> pull(p_val)
 ```
 
 ```{r}
-gf_density( ~ diff, data = perm) |>
+mcmc_areas(perm, prob = 0.95) |>
   gf_vline(xintercept = ~ obs_diff, color = "red") |>
   gf_vline(xintercept = ~ -obs_diff, color = "red")
 ```
@@ -125,7 +126,7 @@ perm_t |> summarize(p_val = mean(abs(t) >= abs(obs_t))) |> pull(p_val)
 ```
 
 ```{r}
-gf_density( ~ t, data = perm_t) |>
+mcmc_areas(perm_t, prob = 0.95) |>
   gf_vline(xintercept = ~ obs_t, color = "red") |>
   gf_vline(xintercept = ~ -obs_t, color = "red")
 ```
@@ -189,7 +190,7 @@ bayes_df <-
     prior_intercept = NULL,
     chains = 2,
     iter = M,
-    seed = 123
+    seed = 666
   ) |>
   as_draws_df() |>
   select(XB) |>
@@ -201,7 +202,7 @@ df <- bind_cols(bayes_df, boot_df)
 
 summarise_draws(df)
 
-mcmc_areas(df)
+mcmc_areas(df, prob = 0.95)
 ```
 
 > In this sense, the bootstrap distribution represents an (approximate) nonparametric, noninformative posterior distribution for our parameter. But this bootstrap distribution is obtained painlessly — without having to formally specify a prior and without having to sample from the posterior distribution. Hence we might think of the bootstrap distribution as a “poor man’s” Bayes posterior. By perturbing the data, the bootstrap approximates the Bayesian effect of perturbing the parameters, and is typically much simpler to carry out.
