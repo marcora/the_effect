@@ -1,0 +1,239 @@
+---
+title: "pushpin"
+format: 
+  html:
+    df-print: kable
+    toc: true
+---
+
+```{r}
+#| output: false
+
+# Load packages
+library(tidyverse)
+library(ggformula)
+library(broom)
+library(bayestestR)
+library(bayesplot)
+
+set.seed(666)
+
+theme_set(theme_minimal())
+```
+
+```{r}
+# Simulate 10 push pin flips: 1 = point-up, 0 = point-down
+n_flips <- 10
+true_theta <- 0.3  # unknown to observer
+y <- rbinom(n_flips, size = 1, prob = true_theta)
+
+# Summarize observed data
+successes <- sum(y)
+
+successes
+```
+
+```{r}
+# Frequentist NHST: classical binomial test
+binom.test(successes, n_flips, p = 0.5, alternative = "two.sided") |> tidy()
+```
+
+```{r}
+# Grid for approximation
+theta_grid <- seq(0, 1, length.out = 1000)
+
+# Likelihood from observed data
+likelihood <- dbinom(successes, size = n_flips, prob = theta_grid)
+
+# Plot posterior
+plot_df <- tibble(theta = theta_grid, likelihood = likelihood)
+
+gf_line(likelihood ~ theta, data = plot_df, color = "red") %>%
+  gf_labs(
+    title = "Likelihood of θ given data",
+    x = expression(theta),
+    y = "density"
+  )
+```
+
+```{r}
+# Step 1: Identify MLE
+mle_index <- which.max(likelihood)
+mle_theta <- theta_grid[mle_index]
+max_lik <- likelihood[mle_index]
+
+# Step 2: Compute likelihood ratio threshold for 95% CI
+ci_threshold <- max_lik * exp(-qchisq(0.95, df = 1) / 2)  # ≈ 0.1465 * max_lik
+
+# Step 3: Identify the interval
+in_ci <- likelihood >= ci_threshold
+ci_bounds <- range(theta_grid[in_ci])
+
+tibble(
+  mle = mle_theta,
+  ci_lower = ci_bounds[1],
+  ci_upper = ci_bounds[2]
+)
+```
+
+```{r}
+# Bayesian inference
+
+# Uniform prior
+prior_unif <- dunif(theta_grid, min = 0, max = 1)
+
+# Likelihood from observed data
+likelihood <- dbinom(successes, size = n_flips, prob = theta_grid)
+
+# Unnormalized posterior
+posterior_unnorm <- prior_unif * likelihood
+
+# Normalize posterior
+posterior <- posterior_unnorm / sum(posterior_unnorm)
+
+# Plot posterior with prior and normalized likelihood
+plot_df <- tibble(
+  theta = theta_grid,
+  prior = prior_unif / sum(prior_unif),
+  likelihood_norm = likelihood / sum(likelihood),
+  posterior = posterior
+) %>%
+  pivot_longer(-theta, names_to = "fn", values_to = "density")
+
+gf_line(density ~ theta, color = ~ fn, data = plot_df) %>%
+  gf_labs(
+    title = "Bayesian inference with uniform prior",
+    x = expression(theta),
+    y = "density"
+  )
+```
+
+```{r}
+# Sample from posterior and summarize
+posterior_samples <- sample(theta_grid, size = 10000, replace = TRUE, prob = posterior)
+
+# with example ROPE for null = 0.5
+describe_posterior(posterior_samples,
+                   ci = 0.95,
+                   rope_range = c(0.45, 0.55),
+                   test = c("pd", "rope", "hdi", "map"))
+
+mcmc_areas(tibble(theta = posterior_samples), pars = "theta", prob = .95)
+```
+
+```{r}
+# Bayesian inference
+
+# Beta(1, 2) prior
+prior_beta <- dbeta(theta_grid, shape1 = 1, shape2 = 2)
+
+# Likelihood from observed data
+likelihood <- dbinom(successes, size = n_flips, prob = theta_grid)
+
+# Unnormalized posterior
+posterior_unnorm <- prior_beta * likelihood
+
+# Normalize posterior
+posterior <- posterior_unnorm / sum(posterior_unnorm)
+
+# Plot posterior with prior and normalized likelihood
+plot_df <- tibble(
+  theta = theta_grid,
+  prior = prior_beta / sum(prior_beta),
+  likelihood_norm = likelihood / sum(likelihood),
+  posterior = posterior
+) %>%
+  pivot_longer(-theta, names_to = "fn", values_to = "density")
+
+gf_line(density ~ theta, color = ~ fn, data = plot_df) %>%
+  gf_labs(
+    title = "Bayesian inference with beta(1, 2) prior",
+    x = expression(theta),
+    y = "density"
+  )
+```
+
+```{r}
+# Sample from posterior and summarize
+posterior_samples <- sample(theta_grid, size = 10000, replace = TRUE, prob = posterior)
+
+# with example ROPE for null = 0.5
+describe_posterior(posterior_samples,
+                   ci = 0.95,
+                   rope_range = c(0.45, 0.55),
+                   test = c("pd", "rope", "hdi", "map"))
+
+mcmc_areas(tibble(theta = posterior_samples), pars = "theta", prob = .95)
+```
+
+```{r}
+successes <- 10
+
+# Bayesian inference
+
+# Beta(1, 2) prior
+prior_beta <- dbeta(theta_grid, shape1 = 1, shape2 = 2)
+
+# Likelihood from observed data
+likelihood <- dbinom(successes, size = n_flips, prob = theta_grid)
+
+# Unnormalized posterior
+posterior_unnorm <- prior_beta * likelihood
+
+# Normalize posterior
+posterior <- posterior_unnorm / sum(posterior_unnorm)
+
+# Plot posterior with prior and normalized likelihood
+plot_df <- tibble(
+  theta = theta_grid,
+  prior = prior_beta / sum(prior_beta),
+  likelihood_norm = likelihood / sum(likelihood),
+  posterior = posterior
+) %>%
+  pivot_longer(-theta, names_to = "fn", values_to = "density")
+
+gf_line(density ~ theta, color = ~ fn, data = plot_df) %>%
+  gf_labs(
+    title = "Bayesian inference with beta(1, 2) prior",
+    x = expression(theta),
+    y = "density"
+  )
+```
+
+```{r}
+# Sample from posterior and summarize
+posterior_samples <- sample(theta_grid, size = 10000, replace = TRUE, prob = posterior)
+
+# with example ROPE for null = 0.5
+describe_posterior(posterior_samples,
+                   ci = 0.95,
+                   rope_range = c(0.45, 0.55),
+                   test = c("pd", "rope", "hdi", "map"))
+
+mcmc_areas(tibble(theta = posterior_samples), pars = "theta", prob = .95)
+```
+
+```{r}
+# Frequentist NHST: classical binomial test
+binom.test(successes, n_flips, p = 0.5, alternative = "two.sided") |> tidy()
+```
+
+```{r}
+# Step 1: Identify MLE
+mle_index <- which.max(likelihood)
+mle_theta <- theta_grid[mle_index]
+max_lik <- likelihood[mle_index]
+
+# Step 2: Compute likelihood ratio threshold for 95% CI
+ci_threshold <- max_lik * exp(-qchisq(0.95, df = 1) / 2)  # ≈ 0.1465 * max_lik
+
+# Step 3: Identify the interval
+in_ci <- likelihood >= ci_threshold
+ci_bounds <- range(theta_grid[in_ci])
+
+tibble(
+  mle = mle_theta,
+  ci_lower = ci_bounds[1],
+  ci_upper = ci_bounds[2]
+)
+```

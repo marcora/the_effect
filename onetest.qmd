@@ -123,7 +123,7 @@ mcmc_areas(perm_t, prob = 0.95) |>
 ```
 
 | Approach | Assumes Normality | Assumes Equal Variance | Null Distribution Source | Test Statistic | Flexibility / Robustness | P-value Computation |
-|-----------|-----------|-----------|-----------|-----------|-----------|-----------|
+|----|----|----|----|----|----|----|
 | Classical t-test | Yes | Yes (Student's t) | Theoretical t-distribution | t-statistic | Low (sensitive to assumptions) | Analytical from t-distribution |
 | Parametric Simulation | Yes | Yes (via sd) | Simulated from `rnorm()` under H₀ | Difference in means | Moderate (assumes model) | Proportion of extreme simulated diffs |
 | Permutation Test (Diff in Means) | No | No | Empirical from permuted label diffs | Difference in means | High (non-parametric) | Proportion of extreme permuted diffs |
