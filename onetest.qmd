@@ -8,6 +8,10 @@ editor: source
 bibliography: references.bib
 ---
 
+![](images/clipboard-3357125979.png)
+
+<https://youtu.be/YKMZIzYBgTk>
+
 ## Setup environment
 
 ```{r}
