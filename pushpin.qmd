@@ -150,10 +150,10 @@ mcmc_areas(tibble(theta = posterior_samples),
            prob = .95)
 ```
 
-## Bayesian inference with beta(1, 2) prior
+## Bayesian inference with beta(2, 3) prior
 
 ```{r}
-prior_beta <- dbeta(theta_grid, shape1 = 1, shape2 = 2)
+prior_beta <- dbeta(theta_grid, shape1 = 2, shape2 = 3)
 
 posterior_unnorm <- prior_beta * likelihood
 posterior <- posterior_unnorm / sum(posterior_unnorm)
@@ -167,7 +167,7 @@ plot_df <- tibble(
   pivot_longer(-theta, names_to = "fn", values_to = "density")
 
 gf_line(density ~ theta, color = ~ fn, data = plot_df) |>
-  gf_labs(title = "Bayesian inference with beta(1, 2) prior",
+  gf_labs(title = "Bayesian inference with beta(2, 3) prior",
           x = expression(theta),
           y = "density")
 ```
@@ -200,8 +200,8 @@ likelihood <- dbinom(successes, size = n_flips, prob = theta_grid)
 ```
 
 ```{r}
-# Bayesian inference with beta(1, 2) prior
-prior_beta <- dbeta(theta_grid, shape1 = 1, shape2 = 2)
+# Bayesian inference with beta(2, 3) prior
+prior_beta <- dbeta(theta_grid, shape1 = 2, shape2 = 3)
 posterior_unnorm <- prior_beta * likelihood
 posterior <- posterior_unnorm / sum(posterior_unnorm)
 
@@ -214,7 +214,7 @@ plot_df <- tibble(
   pivot_longer(-theta, names_to = "fn", values_to = "density")
 
 gf_line(density ~ theta, color = ~ fn, data = plot_df) |>
-  gf_labs(title = "Bayesian inference with beta(1, 2) prior",
+  gf_labs(title = "Bayesian inference with beta(2, 3) prior",
           x = expression(theta),
           y = "density")
 ```

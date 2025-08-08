@@ -88,7 +88,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#poor-mans-posterior-resampling-of-observed-data" id="toc-poor-mans-posterior-resampling-of-observed-data" class="nav-link" data-scroll-target="#poor-mans-posterior-resampling-of-observed-data">“Poor man’s posterior”: resampling of observed data</a></li>
   <li><a href="#likelihood-inference" id="toc-likelihood-inference" class="nav-link" data-scroll-target="#likelihood-inference">Likelihood inference</a></li>
   <li><a href="#bayesian-inference-with-uniform-prior" id="toc-bayesian-inference-with-uniform-prior" class="nav-link" data-scroll-target="#bayesian-inference-with-uniform-prior">Bayesian inference with uniform prior</a></li>
-  <li><a href="#bayesian-inference-with-beta1-2-prior" id="toc-bayesian-inference-with-beta1-2-prior" class="nav-link" data-scroll-target="#bayesian-inference-with-beta1-2-prior">Bayesian inference with beta(1, 2) prior</a></li>
+  <li><a href="#bayesian-inference-with-beta2-3-prior" id="toc-bayesian-inference-with-beta2-3-prior" class="nav-link" data-scroll-target="#bayesian-inference-with-beta2-3-prior">Bayesian inference with beta(2, 3) prior</a></li>
   <li><a href="#comparison-of-bayesian-likelihood-and-frequentist-inferences-when-1010-flips-are-point-up" id="toc-comparison-of-bayesian-likelihood-and-frequentist-inferences-when-1010-flips-are-point-up" class="nav-link" data-scroll-target="#comparison-of-bayesian-likelihood-and-frequentist-inferences-when-1010-flips-are-point-up">Comparison of Bayesian, likelihood and frequentist inferences when 10/10 flips are point-up</a></li>
   </ul>
 </nav>
@@ -468,10 +468,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="bayesian-inference-with-beta1-2-prior" class="level2">
-<h2 class="anchored" data-anchor-id="bayesian-inference-with-beta1-2-prior">Bayesian inference with beta(1, 2) prior</h2>
+<section id="bayesian-inference-with-beta2-3-prior" class="level2">
+<h2 class="anchored" data-anchor-id="bayesian-inference-with-beta2-3-prior">Bayesian inference with beta(2, 3) prior</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>prior_beta <span class="ot">&lt;-</span> <span class="fu">dbeta</span>(theta_grid, <span class="at">shape1 =</span> <span class="dv">1</span>, <span class="at">shape2 =</span> <span class="dv">2</span>)</span>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>prior_beta <span class="ot">&lt;-</span> <span class="fu">dbeta</span>(theta_grid, <span class="at">shape1 =</span> <span class="dv">2</span>, <span class="at">shape2 =</span> <span class="dv">3</span>)</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>posterior_unnorm <span class="ot">&lt;-</span> prior_beta <span class="sc">*</span> likelihood</span>
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>posterior <span class="ot">&lt;-</span> posterior_unnorm <span class="sc">/</span> <span class="fu">sum</span>(posterior_unnorm)</span>
@@ -485,7 +485,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>theta, <span class="at">names_to =</span> <span class="st">"fn"</span>, <span class="at">values_to =</span> <span class="st">"density"</span>)</span>
 <span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="fu">gf_line</span>(density <span class="sc">~</span> theta, <span class="at">color =</span> <span class="sc">~</span> fn, <span class="at">data =</span> plot_df) <span class="sc">|&gt;</span></span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gf_labs</span>(<span class="at">title =</span> <span class="st">"Bayesian inference with beta(1, 2) prior"</span>,</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gf_labs</span>(<span class="at">title =</span> <span class="st">"Bayesian inference with beta(2, 3) prior"</span>,</span>
 <span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>          <span class="at">x =</span> <span class="fu">expression</span>(theta),</span>
 <span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>          <span class="at">y =</span> <span class="st">"density"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
@@ -541,15 +541,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Posterior</td>
-<td style="text-align: right;">0.3804</td>
+<td style="text-align: right;">0.3974</td>
 <td style="text-align: right;">0.95</td>
-<td style="text-align: right;">0.1522</td>
-<td style="text-align: right;">0.6537</td>
+<td style="text-align: right;">0.1792</td>
+<td style="text-align: right;">0.6496</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">0.95</td>
 <td style="text-align: right;">0.45</td>
 <td style="text-align: right;">0.55</td>
-<td style="text-align: right;">0.208</td>
+<td style="text-align: right;">0.2367</td>
 </tr>
 </tbody>
 </table>
@@ -575,8 +575,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>likelihood <span class="ot">&lt;-</span> <span class="fu">dbinom</span>(successes, <span class="at">size =</span> n_flips, <span class="at">prob =</span> theta_grid)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Bayesian inference with beta(1, 2) prior</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>prior_beta <span class="ot">&lt;-</span> <span class="fu">dbeta</span>(theta_grid, <span class="at">shape1 =</span> <span class="dv">1</span>, <span class="at">shape2 =</span> <span class="dv">2</span>)</span>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Bayesian inference with beta(2, 3) prior</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>prior_beta <span class="ot">&lt;-</span> <span class="fu">dbeta</span>(theta_grid, <span class="at">shape1 =</span> <span class="dv">2</span>, <span class="at">shape2 =</span> <span class="dv">3</span>)</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>posterior_unnorm <span class="ot">&lt;-</span> prior_beta <span class="sc">*</span> likelihood</span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>posterior <span class="ot">&lt;-</span> posterior_unnorm <span class="sc">/</span> <span class="fu">sum</span>(posterior_unnorm)</span>
 <span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
@@ -589,7 +589,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>theta, <span class="at">names_to =</span> <span class="st">"fn"</span>, <span class="at">values_to =</span> <span class="st">"density"</span>)</span>
 <span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="fu">gf_line</span>(density <span class="sc">~</span> theta, <span class="at">color =</span> <span class="sc">~</span> fn, <span class="at">data =</span> plot_df) <span class="sc">|&gt;</span></span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gf_labs</span>(<span class="at">title =</span> <span class="st">"Bayesian inference with beta(1, 2) prior"</span>,</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gf_labs</span>(<span class="at">title =</span> <span class="st">"Bayesian inference with beta(2, 3) prior"</span>,</span>
 <span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>          <span class="at">x =</span> <span class="fu">expression</span>(theta),</span>
 <span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>          <span class="at">y =</span> <span class="st">"density"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
@@ -645,10 +645,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Posterior</td>
-<td style="text-align: right;">0.8639</td>
+<td style="text-align: right;">0.8138</td>
 <td style="text-align: right;">0.95</td>
-<td style="text-align: right;">0.6116</td>
-<td style="text-align: right;">0.979</td>
+<td style="text-align: right;">0.5726</td>
+<td style="text-align: right;">0.955</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">0.95</td>
 <td style="text-align: right;">0.45</td>
