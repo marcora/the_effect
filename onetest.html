@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.7.33">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -85,7 +85,7 @@ div.csl-indent {
 <script src="onetest_files/libs/quarto-html/tippy.umd.min.js"></script>
 <script src="onetest_files/libs/quarto-html/anchor.min.js"></script>
 <link href="onetest_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="onetest_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="onetest_files/libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="onetest_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="onetest_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="onetest_files/libs/bootstrap/bootstrap-81267100e462c21b3d6c0d5bf76a3417.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -130,7 +130,9 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#parametric-bootstrapping-of-estimator-under-the-null" id="toc-parametric-bootstrapping-of-estimator-under-the-null" class="nav-link active" data-scroll-target="#parametric-bootstrapping-of-estimator-under-the-null">Parametric bootstrapping of estimator under the null</a></li>
+  <li><a href="#setup-environment" id="toc-setup-environment" class="nav-link active" data-scroll-target="#setup-environment">Setup environment</a></li>
+  <li><a href="#simulate-data" id="toc-simulate-data" class="nav-link" data-scroll-target="#simulate-data">Simulate data</a></li>
+  <li><a href="#parametric-bootstrapping-of-estimator-under-the-null" id="toc-parametric-bootstrapping-of-estimator-under-the-null" class="nav-link" data-scroll-target="#parametric-bootstrapping-of-estimator-under-the-null">Parametric bootstrapping of estimator under the null</a></li>
   <li><a href="#non-parametric-permutation-testing" id="toc-non-parametric-permutation-testing" class="nav-link" data-scroll-target="#non-parametric-permutation-testing">Non-parametric permutation testing</a></li>
   <li><a href="#poor-mans-posterior-non-parametric-bootstrapping-of-estimator" id="toc-poor-mans-posterior-non-parametric-bootstrapping-of-estimator" class="nav-link" data-scroll-target="#poor-mans-posterior-non-parametric-bootstrapping-of-estimator">“Poor man’s posterior”: Non-parametric bootstrapping of estimator</a></li>
   </ul>
@@ -157,8 +159,8 @@ window.Quarto = {
 </header>
 
 
-<section id="parametric-bootstrapping-of-estimator-under-the-null" class="level2">
-<h2 class="anchored" data-anchor-id="parametric-bootstrapping-of-estimator-under-the-null">Parametric bootstrapping of estimator under the null</h2>
+<section id="setup-environment" class="level2">
+<h2 class="anchored" data-anchor-id="setup-environment">Setup environment</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggformula)</span>
@@ -171,6 +173,9 @@ window.Quarto = {
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">666</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="simulate-data" class="level2">
+<h2 class="anchored" data-anchor-id="simulate-data">Simulate data</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">10</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>M <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
@@ -297,6 +302,9 @@ window.Quarto = {
 <pre><code>[1] 0.06409</code></pre>
 </div>
 </div>
+</section>
+<section id="parametric-bootstrapping-of-estimator-under-the-null" class="level2">
+<h2 class="anchored" data-anchor-id="parametric-bootstrapping-of-estimator-under-the-null">Parametric bootstrapping of estimator under the null</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate null distribution parameters</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>pooled_mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(d<span class="sc">$</span>Y)</span>
