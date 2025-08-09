@@ -33,6 +33,8 @@ true_theta <- 0.3  # fixed parameter unknown to observer
 
 y <- rbinom(n_flips, size = 1, prob = true_theta)
 
+y
+
 (successes <- sum(y))
 
 (obs_prop <- mean(y))
@@ -52,7 +54,7 @@ binom.test(successes, n_flips, p = 0.5, alternative = "two.sided") |> tidy()
 # sampling distribution under the null
 null_props <- do(10000) * tibble(prop = rbinom(1, size = n_flips, prob = 0.5) / n_flips)
 
-p_value <- mean(abs(null_props - 0.5) >= abs(obs_prop - 0.5))
+p_value <- mean(abs(obs_prop - 0.5) <= abs(null_props - 0.5))
 
 cat("Two-sided p-value under H₀: θ = 0.5:", round(p_value, 4), "\n")
 ```
@@ -123,7 +125,7 @@ plot_df <- tibble(
   likelihood_norm = likelihood / sum(likelihood),
   posterior = posterior
 ) |>
-  pivot_longer(-theta, names_to = "fn", values_to = "density")
+  pivot_longer(- theta, names_to = "fn", values_to = "density")
 
 gf_line(density ~ theta, color = ~ fn, data = plot_df) |>
   gf_labs(title = "Bayesian inference with uniform prior",
@@ -164,7 +166,7 @@ plot_df <- tibble(
   likelihood_norm = likelihood / sum(likelihood),
   posterior = posterior
 ) |>
-  pivot_longer(-theta, names_to = "fn", values_to = "density")
+  pivot_longer(- theta, names_to = "fn", values_to = "density")
 
 gf_line(density ~ theta, color = ~ fn, data = plot_df) |>
   gf_labs(title = "Bayesian inference with beta(2, 3) prior",
@@ -191,7 +193,7 @@ mcmc_areas(tibble(theta = posterior_samples),
            prob = .95)
 ```
 
-## Comparison of Bayesian, likelihood and frequentist inferences when 10/10 flips are point-up
+## Comparison of Bayesian, likelihood and frequentist inferences when 10/10 flips are point-up in a follow-up experiment
 
 ```{r}
 successes <- 10
@@ -200,50 +202,12 @@ likelihood <- dbinom(successes, size = n_flips, prob = theta_grid)
 ```
 
 ```{r}
-# Bayesian inference with beta(2, 3) prior
-prior_beta <- dbeta(theta_grid, shape1 = 2, shape2 = 3)
-posterior_unnorm <- prior_beta * likelihood
-posterior <- posterior_unnorm / sum(posterior_unnorm)
-
-plot_df <- tibble(
-  theta = theta_grid,
-  prior = prior_beta / sum(prior_beta),
-  likelihood_norm = likelihood / sum(likelihood),
-  posterior = posterior
-) |>
-  pivot_longer(-theta, names_to = "fn", values_to = "density")
-
-gf_line(density ~ theta, color = ~ fn, data = plot_df) |>
-  gf_labs(title = "Bayesian inference with beta(2, 3) prior",
-          x = expression(theta),
-          y = "density")
-```
-
-```{r}
-posterior_samples <- sample(theta_grid,
-                            size = 10000,
-                            replace = TRUE,
-                            prob = posterior)
-
-# with example ROPE for null = 0.5
-describe_posterior(
-  posterior_samples,
-  ci = 0.95,
-  rope_range = c(0.45, 0.55),
-  test = c("pd", "rope", "hdi", "map")
-)
-
-mcmc_areas(tibble(theta = posterior_samples),
-           pars = "theta",
-           prob = .95)
-```
-
-```{r}
 # Frequentist NHST: classical binomial test
 binom.test(successes, n_flips, p = 0.5, alternative = "two.sided") |> tidy()
 ```
 
 ```{r}
+# Likelihood inference
 mle_index <- which.max(likelihood)
 mle_theta <- theta_grid[mle_index]
 max_lik <- likelihood[mle_index]
@@ -256,4 +220,44 @@ ci_bounds <- range(theta_grid[in_ci])
 tibble(mle = mle_theta,
        ci_lower = ci_bounds[1],
        ci_upper = ci_bounds[2])
+```
+
+```{r}
+# Bayesian inference with beta(2, 3) prior
+prior_beta <- dbeta(theta_grid, shape1 = 2 + 4, shape2 = 3 + 6)
+posterior_unnorm <- prior_beta * likelihood
+posterior <- posterior_unnorm / sum(posterior_unnorm)
+
+plot_df <- tibble(
+  theta = theta_grid,
+  prior = prior_beta / sum(prior_beta),
+  likelihood_norm = likelihood / sum(likelihood),
+  posterior = posterior
+) |>
+  pivot_longer(- theta, names_to = "fn", values_to = "density")
+
+gf_line(density ~ theta, color = ~ fn, data = plot_df) |>
+  gf_labs(title = "Bayesian inference with beta(2 + 4, 3 + 6) prior",
+          subtitle = "i.e., the posterior from the previous experiment",
+          x = expression(theta),
+          y = "density")
+```
+
+```{r}
+posterior_samples <- sample(theta_grid,
+                            size = 10000,
+                            replace = TRUE,
+                            prob = posterior)
+
+# with example ROPE for null = 0.5
+describe_posterior(
+  posterior_samples,
+  ci = 0.95,
+  rope_range = c(0.45, 0.55),
+  test = c("pd", "rope", "hdi", "map")
+)
+
+mcmc_areas(tibble(theta = posterior_samples),
+           pars = "theta",
+           prob = .95)
 ```
