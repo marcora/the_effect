@@ -1,0 +1,64 @@
+---
+title: "bayesian_vs_frequentist_inference"
+format: html
+---
+
+## Setup environment
+
+```{r}
+#| output: false
+library(tidyverse)
+library(ggformula)
+
+set.seed(1234)
+
+theme_set(theme_minimal())
+```
+
+## Joint distribution
+
+```{r}
+ss <- expand_grid(y = seq(0, 10, by = 0.1), θ = seq(0, 10, by = 0.1)) |>
+  mutate(p = 1 / n()) |>
+  mutate(m = (y - 5)^2 + (θ - 5)^2 <= 5^2) |>
+  mutate(p = ifelse(m, p / sum(p[m]), 0))
+
+gf_tile(y ~ θ, fill = ~ p, data = ss)
+```
+
+# Marginal distributions
+
+```{r}
+marg_y <- ss |> group_by(y) |> summarise(p_y = sum(p), .groups = "drop")
+
+gf_line(p_y ~ y, data = marg_y) |> gf_labs(x = "y", y = "p(y)")
+```
+
+```{r}
+marg_theta <- ss |> group_by(θ) |> summarise(p_theta = sum(p), .groups = "drop")
+
+gf_line(p_theta ~ θ, data = marg_theta) |> gf_labs(x = "θ", y = "p(θ)")
+```
+
+
+## Conditional distributions
+
+```{r}
+# p(y | theta = 5)
+p_y_given_theta5 <- ss %>%
+  filter(θ == 5) %>%
+  mutate(p = p / sum(p))
+
+gf_line(p ~ y, data = p_y_given_theta5) |>  
+  gf_labs(x = "y", y = "p(y | θ = 5)", title = "Frequentist inference: p(y | θ = 5)")
+```
+
+```{r}
+# p(theta | y = 5)
+p_theta_given_y5 <- ss %>%
+  filter(y == 5) %>%
+  mutate(p = p / sum(p))
+
+gf_line(p ~ θ, data = p_theta_given_y5) |> 
+  gf_labs(x = "θ", y = "p(θ | y = 5)", title = "Bayesian inference: p(θ | y = 5)")
+```
