@@ -40,7 +40,6 @@ marg_theta <- ss |> group_by(θ) |> summarise(p_theta = sum(p), .groups = "drop"
 gf_line(p_theta ~ θ, data = marg_theta) |> gf_labs(x = "θ", y = "p(θ)")
 ```
 
-
 ## Conditional distributions
 
 ```{r}

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.7.33">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -65,7 +65,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="chapter_5.identification_files/libs/quarto-html/tippy.umd.min.js"></script>
 <script src="chapter_5.identification_files/libs/quarto-html/anchor.min.js"></script>
 <link href="chapter_5.identification_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="chapter_5.identification_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="chapter_5.identification_files/libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="chapter_5.identification_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="chapter_5.identification_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="chapter_5.identification_files/libs/bootstrap/bootstrap-81267100e462c21b3d6c0d5bf76a3417.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -687,7 +687,7 @@ Attaching package: 'dagitty'</code></pre>
 <div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Query adjustment sets for effect of sex on weight</span></span>
 <span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a><span class="fu">adjustmentSets</span>(dag, <span class="at">exposure =</span> <span class="st">"sex"</span>, <span class="at">outcome =</span> <span class="st">"weight"</span>)  <span class="co"># total effect of sex on weight → {}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> {}</code></pre>
+<pre><code>{}</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">adjustmentSets</span>(dag, <span class="at">exposure =</span> <span class="st">"sex"</span>, <span class="at">outcome =</span> <span class="st">"weight"</span>, <span class="at">effect =</span> <span class="st">"direct"</span>)  <span class="co"># direct effect of sex on weight→ {height}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
